@@ -59,8 +59,6 @@ struct BootEntry {
 	std::string label;
 };
 
-static void DrawHomeTop(const std::vector<BootEntry> &entries, int selected);
-
 static void RuntimeLog(const char *fmt, ...) {
 	char line[1024]{};
 	va_list args;
@@ -210,11 +208,6 @@ static std::vector<BootEntry> FindBootEntries() {
 }
 
 static bool ReadAutobootEntry(BootEntry *entry) {
-	if (!File::Exists(Path("sdmc:/3ds/PPSSPP/autoboot.enabled"))) {
-		RuntimeLog("autoboot: disabled");
-		return false;
-	}
-
 	FILE *f = fopen("sdmc:/3ds/PPSSPP/autoboot.txt", "rb");
 	if (!f) {
 		RuntimeLog("autoboot: none");
@@ -248,9 +241,8 @@ static void BottomStatus(const char *title, const char *line1 = "", const char *
 }
 
 static void DrawMenu(const std::vector<BootEntry> &entries, int selected, int top) {
-	DrawHomeTop(entries, selected);
 	P3DS_BottomClear();
-	printf("\x1b[1;1HPPSSPP 3DS Home");
+	printf("\x1b[1;1HPPSSPP 3DS");
 	printf("\x1b[2;1HA Launch  B Rescan  START Exit");
 
 	if (entries.empty()) {
@@ -259,7 +251,6 @@ static void DrawMenu(const std::vector<BootEntry> &entries, int selected, int to
 		printf("\x1b[8;1Hsdmc:/PSP/GAME");
 		printf("\x1b[9;1Hsdmc:/ISO");
 		printf("\x1b[10;1Hsdmc:/3ds/PPSSPP");
-		printf("\x1b[12;1HAutoboot is off by default.");
 		return;
 	}
 
@@ -293,110 +284,6 @@ static void ClearTop(u8 r, u8 g, u8 b) {
 			WriteTopPixel(x, y, r, g, b);
 		}
 	}
-	P3DS_Present();
-}
-
-static void FillTopRect(int x, int y, int w, int h, u8 r, u8 g, u8 b) {
-	const int x2 = std::min(TOP_W, x + w);
-	const int y2 = std::min(TOP_H, y + h);
-	for (int px = std::max(0, x); px < x2; ++px) {
-		for (int py = std::max(0, y); py < y2; ++py) {
-			WriteTopPixel(px, py, r, g, b);
-		}
-	}
-}
-
-static uint8_t GlyphRow(char c, int row) {
-	c = (char)std::toupper((unsigned char)c);
-	switch (c) {
-	case 'A': { static const uint8_t g[] = { 0x0E, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11 }; return g[row]; }
-	case 'B': { static const uint8_t g[] = { 0x1E, 0x11, 0x11, 0x1E, 0x11, 0x11, 0x1E }; return g[row]; }
-	case 'C': { static const uint8_t g[] = { 0x0E, 0x11, 0x10, 0x10, 0x10, 0x11, 0x0E }; return g[row]; }
-	case 'D': { static const uint8_t g[] = { 0x1E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x1E }; return g[row]; }
-	case 'E': { static const uint8_t g[] = { 0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x1F }; return g[row]; }
-	case 'F': { static const uint8_t g[] = { 0x1F, 0x10, 0x10, 0x1E, 0x10, 0x10, 0x10 }; return g[row]; }
-	case 'G': { static const uint8_t g[] = { 0x0E, 0x11, 0x10, 0x17, 0x11, 0x11, 0x0E }; return g[row]; }
-	case 'H': { static const uint8_t g[] = { 0x11, 0x11, 0x11, 0x1F, 0x11, 0x11, 0x11 }; return g[row]; }
-	case 'I': { static const uint8_t g[] = { 0x0E, 0x04, 0x04, 0x04, 0x04, 0x04, 0x0E }; return g[row]; }
-	case 'J': { static const uint8_t g[] = { 0x01, 0x01, 0x01, 0x01, 0x11, 0x11, 0x0E }; return g[row]; }
-	case 'K': { static const uint8_t g[] = { 0x11, 0x12, 0x14, 0x18, 0x14, 0x12, 0x11 }; return g[row]; }
-	case 'L': { static const uint8_t g[] = { 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x1F }; return g[row]; }
-	case 'M': { static const uint8_t g[] = { 0x11, 0x1B, 0x15, 0x15, 0x11, 0x11, 0x11 }; return g[row]; }
-	case 'N': { static const uint8_t g[] = { 0x11, 0x19, 0x15, 0x13, 0x11, 0x11, 0x11 }; return g[row]; }
-	case 'O': { static const uint8_t g[] = { 0x0E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E }; return g[row]; }
-	case 'P': { static const uint8_t g[] = { 0x1E, 0x11, 0x11, 0x1E, 0x10, 0x10, 0x10 }; return g[row]; }
-	case 'Q': { static const uint8_t g[] = { 0x0E, 0x11, 0x11, 0x11, 0x15, 0x12, 0x0D }; return g[row]; }
-	case 'R': { static const uint8_t g[] = { 0x1E, 0x11, 0x11, 0x1E, 0x14, 0x12, 0x11 }; return g[row]; }
-	case 'S': { static const uint8_t g[] = { 0x0F, 0x10, 0x10, 0x0E, 0x01, 0x01, 0x1E }; return g[row]; }
-	case 'T': { static const uint8_t g[] = { 0x1F, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04 }; return g[row]; }
-	case 'U': { static const uint8_t g[] = { 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E }; return g[row]; }
-	case 'V': { static const uint8_t g[] = { 0x11, 0x11, 0x11, 0x11, 0x11, 0x0A, 0x04 }; return g[row]; }
-	case 'W': { static const uint8_t g[] = { 0x11, 0x11, 0x11, 0x15, 0x15, 0x15, 0x0A }; return g[row]; }
-	case 'X': { static const uint8_t g[] = { 0x11, 0x11, 0x0A, 0x04, 0x0A, 0x11, 0x11 }; return g[row]; }
-	case 'Y': { static const uint8_t g[] = { 0x11, 0x11, 0x0A, 0x04, 0x04, 0x04, 0x04 }; return g[row]; }
-	case 'Z': { static const uint8_t g[] = { 0x1F, 0x01, 0x02, 0x04, 0x08, 0x10, 0x1F }; return g[row]; }
-	case '0': { static const uint8_t g[] = { 0x0E, 0x11, 0x13, 0x15, 0x19, 0x11, 0x0E }; return g[row]; }
-	case '1': { static const uint8_t g[] = { 0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E }; return g[row]; }
-	case '2': { static const uint8_t g[] = { 0x0E, 0x11, 0x01, 0x02, 0x04, 0x08, 0x1F }; return g[row]; }
-	case '3': { static const uint8_t g[] = { 0x1E, 0x01, 0x01, 0x0E, 0x01, 0x01, 0x1E }; return g[row]; }
-	case '4': { static const uint8_t g[] = { 0x02, 0x06, 0x0A, 0x12, 0x1F, 0x02, 0x02 }; return g[row]; }
-	case '5': { static const uint8_t g[] = { 0x1F, 0x10, 0x10, 0x1E, 0x01, 0x01, 0x1E }; return g[row]; }
-	case '6': { static const uint8_t g[] = { 0x0E, 0x10, 0x10, 0x1E, 0x11, 0x11, 0x0E }; return g[row]; }
-	case '7': { static const uint8_t g[] = { 0x1F, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08 }; return g[row]; }
-	case '8': { static const uint8_t g[] = { 0x0E, 0x11, 0x11, 0x0E, 0x11, 0x11, 0x0E }; return g[row]; }
-	case '9': { static const uint8_t g[] = { 0x0E, 0x11, 0x11, 0x0F, 0x01, 0x01, 0x0E }; return g[row]; }
-	case '-': { static const uint8_t g[] = { 0x00, 0x00, 0x00, 0x1F, 0x00, 0x00, 0x00 }; return g[row]; }
-	case '.': { static const uint8_t g[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x0C }; return g[row]; }
-	case '/': { static const uint8_t g[] = { 0x01, 0x01, 0x02, 0x04, 0x08, 0x10, 0x10 }; return g[row]; }
-	case ':': { static const uint8_t g[] = { 0x00, 0x0C, 0x0C, 0x00, 0x0C, 0x0C, 0x00 }; return g[row]; }
-	default: return 0;
-	}
-}
-
-static void DrawTopText(int x, int y, const std::string &text, int scale, u8 r, u8 g, u8 b) {
-	int cursor = x;
-	for (char ch : text) {
-		if (ch == ' ') {
-			cursor += 4 * scale;
-			continue;
-		}
-		for (int row = 0; row < 7; ++row) {
-			const uint8_t bits = GlyphRow(ch, row);
-			for (int col = 0; col < 5; ++col) {
-				if (bits & (1u << (4 - col))) {
-					FillTopRect(cursor + col * scale, y + row * scale, scale, scale, r, g, b);
-				}
-			}
-		}
-		cursor += 6 * scale;
-	}
-}
-
-static void DrawHomeTop(const std::vector<BootEntry> &entries, int selected) {
-	FillTopRect(0, 0, TOP_W, TOP_H, 9, 12, 18);
-	FillTopRect(0, 0, TOP_W, 38, 25, 31, 46);
-	FillTopRect(0, 38, TOP_W, 3, 236, 179, 64);
-	FillTopRect(24, 63, 58, 58, 236, 179, 64);
-	FillTopRect(32, 71, 42, 42, 255, 216, 102);
-	FillTopRect(90, 63, 3, 130, 72, 164, 220);
-
-	DrawTopText(18, 13, "PPSSPP", 2, 242, 246, 252);
-	DrawTopText(104, 68, "PPSSPP", 5, 242, 246, 252);
-	DrawTopText(106, 115, "NINTENDO 3DS PORT", 2, 72, 204, 220);
-	DrawTopText(106, 142, std::to_string((int)entries.size()) + " GAMES FOUND", 2, 236, 179, 64);
-
-	if (entries.empty()) {
-		DrawTopText(28, 171, "NO PSP CONTENT FOUND", 2, 242, 246, 252);
-		DrawTopText(28, 197, "COPY PBP ISO CSO TO SDMC:/PSP/GAME", 1, 160, 175, 194);
-	} else {
-		std::string label = entries[std::clamp(selected, 0, (int)entries.size() - 1)].label;
-		if (label.size() > 28) {
-			label = label.substr(0, 25) + "...";
-		}
-		DrawTopText(28, 171, "SELECTED", 2, 160, 175, 194);
-		DrawTopText(28, 197, label, 2, 242, 246, 252);
-	}
-
 	P3DS_Present();
 }
 
@@ -716,7 +603,6 @@ static void RunGameLoop(const std::string &path) {
 static bool SelectBootEntry(std::vector<BootEntry> *entries, BootEntry *selectedEntry) {
 	int selected = 0;
 	int top = 0;
-	RuntimeLog("menu: enter entries=%d", (int)entries->size());
 
 	while (P3DS_AptMainLoop()) {
 		DrawMenu(*entries, selected, top);
