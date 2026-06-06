@@ -208,6 +208,11 @@ static std::vector<BootEntry> FindBootEntries() {
 }
 
 static bool ReadAutobootEntry(BootEntry *entry) {
+	if (!File::Exists(Path("sdmc:/3ds/PPSSPP/autoboot.enabled"))) {
+		RuntimeLog("autoboot: disabled");
+		return false;
+	}
+
 	FILE *f = fopen("sdmc:/3ds/PPSSPP/autoboot.txt", "rb");
 	if (!f) {
 		RuntimeLog("autoboot: none");
