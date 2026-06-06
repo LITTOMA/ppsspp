@@ -1740,11 +1740,15 @@ void enable_address_reuse(int fd)
  */
 void enable_keepalive(int fd)
 {
+#if PPSSPP_PLATFORM(3DS)
+	(void)fd;
+#else
 	// Enable Value
 	int on = 1;
 
 	// Enable Port Reuse
 	setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (const char*)&on, sizeof(on));
+#endif
 }
 
 /**

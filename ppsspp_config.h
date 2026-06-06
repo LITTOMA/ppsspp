@@ -117,6 +117,8 @@
     #endif
 #elif defined(__SWITCH__)
     #define PPSSPP_PLATFORM_SWITCH 1
+#elif defined(__3DS__) || defined(_3DS)
+    #define PPSSPP_PLATFORM_3DS 1
 #elif defined(__ANDROID__)
     #define PPSSPP_PLATFORM_ANDROID 1
     #define PPSSPP_PLATFORM_LINUX 1

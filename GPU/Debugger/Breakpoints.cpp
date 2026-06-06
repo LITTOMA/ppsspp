@@ -152,9 +152,10 @@ static bool HitBreakpointCond(GPUBreakpoints::BreakpointInfo &bp, u32 op) {
 	u32 diff = gstate.cmdmem[cmd] ^ op;
 	gstate.cmdmem[cmd] ^= diff;
 
-	u32 result = 1;
-	if (!GPUDebugExecExpression(gpu, bp.expression, result))
-		result = 0;
+	uint32_t execResult = 1;
+	if (!GPUDebugExecExpression(gpu, bp.expression, execResult))
+		execResult = 0;
+	u32 result = (u32)execResult;
 
 	gstate.cmdmem[cmd] ^= diff;
 	return result != 0;

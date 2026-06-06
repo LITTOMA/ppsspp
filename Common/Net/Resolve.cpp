@@ -203,7 +203,7 @@ bool HostPortExists(const std::string &host, int port, int timeout_ms) {
 
 // NOTE: Due to the nature of getaddrinfo, this can block indefinitely. Not good.
 bool DNSResolve(const std::string &host, const std::string &service, addrinfo **res, std::string &error, DNSType type) {
-#if PPSSPP_PLATFORM(SWITCH)
+#if PPSSPP_PLATFORM(SWITCH) || PPSSPP_PLATFORM(3DS)
 	// Force IPv4 lookups.
 	if (type == DNSType::IPV6) {
 		*res = nullptr;
@@ -233,11 +233,13 @@ bool DNSResolve(const std::string &host, const std::string &service, addrinfo **
 
 	*res = nullptr;
 	int result = getaddrinfo(host.c_str(), servicep, &hints, res);
+#ifdef EAI_AGAIN
 	if (result == EAI_AGAIN) {
 		// Temporary failure.  Since this already blocks, let's just try once more.
 		sleep_ms(1, "dns-resolve-poll");
 		result = getaddrinfo(host.c_str(), servicep, &hints, res);
 	}
+#endif
 
 	if (result != 0) {
 #ifdef _WIN32
@@ -261,7 +263,11 @@ void DNSResolveFree(addrinfo *res)
 }
 
 bool GetLocalIP4List(std::vector<std::string> &IP4s) {
+#if PPSSPP_PLATFORM(3DS)
+	char ipstr[INET_ADDRSTRLEN];
+#else
 	char ipstr[INET6_ADDRSTRLEN]; // We use IPv6 length since it's longer than IPv4
+#endif
 // getifaddrs first appeared in glibc 2.3, On Android officially supported since __ANDROID_API__ >= 24
 #if defined(_IFADDRS_H_) || (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3) || (__ANDROID_API__ >= 24)
 	INFO_LOG(Log::sceNet, "GetIPList from getifaddrs");
@@ -345,7 +351,11 @@ bool GetLocalIP4List(std::vector<std::string> &IP4s) {
 	DEBUG_LOG(Log::IO, "GetIPList from fallback method");
 	struct addrinfo hints, * res, * p;
 	memset(&hints, 0, sizeof hints);
+#if PPSSPP_PLATFORM(3DS)
+	hints.ai_family = AF_INET;
+#else
 	hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6 to force version
+#endif
 	hints.ai_socktype = SOCK_DGRAM;
 
 	// Get local host name

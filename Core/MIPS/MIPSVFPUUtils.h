@@ -68,9 +68,9 @@ extern float vfpu_rexp2(float);
 extern float vfpu_log2(float);
 extern float vfpu_rcp(float);
 
-extern void vrnd_init_default(uint32_t *rcx);
-extern void vrnd_init(uint32_t seed, uint32_t *rcx);
-extern uint32_t vrnd_generate(uint32_t *rcx);
+extern void vrnd_init_default(u32 *rcx);
+extern void vrnd_init(u32 seed, u32 *rcx);
+extern u32 vrnd_generate(u32 *rcx);
 
 inline uint32_t get_uexp(uint32_t x) {
 	return (x >> 23) & 0xFF;

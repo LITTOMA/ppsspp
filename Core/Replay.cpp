@@ -338,9 +338,9 @@ bool ReplayIsSaving() {
 	return replayState == ReplayState::SAVE;
 }
 
-static void ReplaySaveCtrl(uint32_t &buttons, uint8_t analog[2][2], uint64_t t) {
+static void ReplaySaveCtrl(u32 &buttons, uint8_t analog[2][2], uint64_t t) {
 	if (lastButtons != buttons) {
-		replayItems.push_back(ReplayItemHeader(ReplayAction::BUTTONS, t, buttons));
+		replayItems.push_back(ReplayItemHeader(ReplayAction::BUTTONS, t, (uint32_t)buttons));
 		lastButtons = buttons;
 	}
 	if (memcmp(lastAnalog, analog, sizeof(lastAnalog)) != 0) {
@@ -349,7 +349,7 @@ static void ReplaySaveCtrl(uint32_t &buttons, uint8_t analog[2][2], uint64_t t) 
 	}
 }
 
-static void ReplayExecuteCtrl(uint32_t &buttons, uint8_t analog[2][2], uint64_t t) {
+static void ReplayExecuteCtrl(u32 &buttons, uint8_t analog[2][2], uint64_t t) {
 	if (replayCtrlPos >= replayItems.size()) {
 		// Don't assert buttons, let the user input prevail.
 		return;
@@ -381,7 +381,7 @@ static void ReplayExecuteCtrl(uint32_t &buttons, uint8_t analog[2][2], uint64_t 
 	}
 }
 
-void ReplayApplyCtrl(uint32_t &buttons, uint8_t analog[2][2], uint64_t t) {
+void ReplayApplyCtrl(u32 &buttons, uint8_t analog[2][2], uint64_t t) {
 	switch (replayState) {
 	case ReplayState::EXECUTE:
 		ReplayExecuteCtrl(buttons, analog, t);

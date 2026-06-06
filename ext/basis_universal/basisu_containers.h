@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <algorithm>
+#include <type_traits>
 
 #if defined(__linux__) && !defined(ANDROID)
 // Only for malloc_usable_size() in basisu_containers_impl.h
@@ -36,7 +37,9 @@ namespace basisu
       inline bool is_power_of_2(uint32_t x) { return x && ((x & (x - 1U)) == 0U); }
       inline bool is_power_of_2(uint64_t x) { return x && ((x & (x - 1U)) == 0U); }
       template<class T> const T& minimum(const T& a, const T& b) { return (b < a) ? b : a; }
+      template<class T, class U> typename std::common_type<T, U>::type minimum(const T& a, const U& b) { return (b < a) ? b : a; }
       template<class T> const T& maximum(const T& a, const T& b) { return (a < b) ? b : a; }
+      template<class T, class U> typename std::common_type<T, U>::type maximum(const T& a, const U& b) { return (a < b) ? b : a; }
 
       inline uint32_t floor_log2i(uint32_t v)
       {

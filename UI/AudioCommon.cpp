@@ -60,7 +60,7 @@ void System_AudioClear() {
 	g_resampler.Clear();
 }
 
-void System_AudioPushSamples(const int32_t *audio, int numSamples, float volume) {
+void System_AudioPushSamples(const s32 *audio, int numSamples, float volume) {
 	if (audio) {
 		if (g_Config.iAudioPlaybackMode == (int)AudioSyncMode::GRANULAR) {
 			g_granular.PushSamples(audio, numSamples, volume);

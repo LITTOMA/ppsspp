@@ -22,6 +22,8 @@
 #endif
 
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <mutex>
 
 #include "Common/CommonTypes.h"
@@ -204,6 +206,40 @@ bail:
 
 bool MemoryMap_Setup(MemMapSetupFlags flags) {
 	g_setupFlags = flags;
+#if PPSSPP_PLATFORM(3DS)
+	m_pNullPage = (flags & MemMapSetupFlags::AllocNullPage) ? (u8 *)calloc(1, 0x00010000) : nullptr;
+	m_pPhysicalScratchPad = (u8 *)calloc(1, SCRATCHPAD_SIZE);
+	m_pPhysicalVRAM[0] = (u8 *)calloc(1, VRAM_SIZE);
+	m_pPhysicalRAM[0] = (u8 *)calloc(1, g_MemorySize);
+
+	if (!m_pPhysicalScratchPad || !m_pPhysicalVRAM[0] || !m_pPhysicalRAM[0]) {
+		ERROR_LOG(Log::MemMap, "MemoryMap_Setup: 3DS compact allocation failed");
+		free(m_pNullPage);
+		free(m_pPhysicalScratchPad);
+		free(m_pPhysicalVRAM[0]);
+		free(m_pPhysicalRAM[0]);
+		m_pNullPage = nullptr;
+		m_pPhysicalScratchPad = nullptr;
+		m_pPhysicalVRAM[0] = nullptr;
+		m_pPhysicalRAM[0] = nullptr;
+		base = nullptr;
+		return false;
+	}
+
+	m_pUncachedScratchPad = m_pPhysicalScratchPad;
+	for (int i = 0; i < 4; ++i) {
+		m_pPhysicalVRAM[i] = m_pPhysicalVRAM[0];
+		m_pUncachedVRAM[i] = m_pPhysicalVRAM[0];
+	}
+	for (int i = 0; i < 3; ++i) {
+		m_pPhysicalRAM[i] = m_pPhysicalRAM[0];
+		m_pUncachedRAM[i] = m_pPhysicalRAM[0];
+		m_pKernelRAM[i] = m_pPhysicalRAM[0];
+		m_pUncachedKernelRAM[i] = m_pPhysicalRAM[0];
+	}
+	base = m_pPhysicalRAM[0];
+	return true;
+#else
 #if PPSSPP_PLATFORM(UWP)
 	// We reserve the memory, then simply commit in TryBase.
 	base = (u8*)VirtualAllocFromApp(0, 0x10000000, MEM_RESERVE, PAGE_READWRITE);
@@ -271,6 +307,7 @@ bool MemoryMap_Setup(MemMapSetupFlags flags) {
 
 	// Should return true...
 	return Memory_TryBase(flags);
+#endif
 }
 
 void MemoryMap_Shutdown() {
@@ -278,6 +315,28 @@ void MemoryMap_Shutdown() {
 	size_t last_position = 0;
 	const MemMapSetupFlags flags = g_setupFlags;
 	g_setupFlags = MemMapSetupFlags::Default;
+
+#if PPSSPP_PLATFORM(3DS)
+	free(m_pNullPage);
+	free(m_pPhysicalScratchPad);
+	free(m_pPhysicalVRAM[0]);
+	free(m_pPhysicalRAM[0]);
+	m_pNullPage = nullptr;
+	m_pPhysicalScratchPad = nullptr;
+	m_pUncachedScratchPad = nullptr;
+	for (int i = 0; i < 4; ++i) {
+		m_pPhysicalVRAM[i] = nullptr;
+		m_pUncachedVRAM[i] = nullptr;
+	}
+	for (int i = 0; i < 3; ++i) {
+		m_pPhysicalRAM[i] = nullptr;
+		m_pUncachedRAM[i] = nullptr;
+		m_pKernelRAM[i] = nullptr;
+		m_pUncachedKernelRAM[i] = nullptr;
+	}
+	base = nullptr;
+	return;
+#endif
 
 	for (int i = 0; i < ARRAY_SIZE(views); i++) {
 		if (views[i].size == 0)
@@ -302,6 +361,34 @@ void MemoryMap_Shutdown() {
 	VirtualFree(base, 0, MEM_RELEASE);
 #endif
 }
+
+#if PPSSPP_PLATFORM(3DS)
+static u8 *MapAddress3DS(const u32 address) {
+	const u32 masked = address & MEMVIEW32_MASK;
+
+	if ((masked & 0x3F800000) == 0x04000000) {
+		return m_pPhysicalVRAM[0] + ((masked - 0x04000000) & (VRAM_SIZE - 1));
+	}
+	if ((address & 0xBFFFC000) == 0x00010000) {
+		return m_pPhysicalScratchPad + (address & (SCRATCHPAD_SIZE - 1));
+	}
+	if (masked >= 0x08000000 && masked < 0x08000000 + g_MemorySize) {
+		return m_pPhysicalRAM[0] + (masked - 0x08000000);
+	}
+	if (m_pNullPage && masked < 0x00010000) {
+		return m_pNullPage + masked;
+	}
+	return m_pPhysicalRAM[0];
+}
+
+u8 *GetPointerWriteUnchecked3DS(const u32 address) {
+	return MapAddress3DS(address);
+}
+
+const u8 *GetPointerUnchecked3DS(const u32 address) {
+	return MapAddress3DS(address);
+}
+#endif
 
 bool Init(MemMapSetupFlags flags) {
 	// On some 32 bit platforms (like Android, iOS, etc.), you can only map < 32 megs at a time.

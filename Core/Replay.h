@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "Common/CommonTypes.h"
 #include "Common/File/Path.h"
 
 // Be careful about changing these values (used in file data.)
@@ -72,7 +73,7 @@ void ReplayAbort();
 bool ReplayIsExecuting();
 bool ReplayIsSaving();
 
-void ReplayApplyCtrl(uint32_t &buttons, uint8_t analog[2][2], uint64_t t);
+void ReplayApplyCtrl(u32 &buttons, uint8_t analog[2][2], uint64_t t);
 uint32_t ReplayApplyDisk(ReplayAction action, uint32_t result, uint64_t t);
 uint64_t ReplayApplyDisk64(ReplayAction action, uint64_t result, uint64_t t);
 uint32_t ReplayApplyDiskRead(void *data, uint32_t readSize, uint32_t dataSize, bool inGameDir, uint64_t t);

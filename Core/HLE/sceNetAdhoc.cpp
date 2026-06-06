@@ -1792,7 +1792,7 @@ int WaitBlockingAdhocSocket(u64 threadSocketId, int type, int pspSocketId, void*
 
 	u32 tmout = timeoutUS;
 	if (tmout > 0)
-		tmout = std::max(tmout, minSocketTimeoutUS);
+		tmout = std::max(tmout, (u32)minSocketTimeoutUS);
 
 	u64 startTime = (u64)(time_now_d() * 1000000.0);
 	adhocSocketRequests[threadSocketId] = { type, pspSocketId, buffer, len, tmout, startTime, remoteMAC, remotePort };

@@ -242,7 +242,7 @@ static bool CheckClutAlphaFull(RasterizerState *state) {
 
 	u32 alphaSum = 0xFFFFFFFF;
 	if (samplerID.ClutFmt() == GE_CMODE_32BIT_ABGR8888) {
-		CheckMask32((const uint32_t *)samplerID.cached.clut, count, &alphaSum);
+		CheckMask32((const u32 *)samplerID.cached.clut, count, &alphaSum);
 	} else {
 		CheckMask16((const uint16_t *)samplerID.cached.clut, count, &alphaSum);
 	}
@@ -1221,8 +1221,8 @@ void DrawRectangle(const VertexData &v0, const VertexData &v1, const BinCoords &
 	int entireY1 = std::min(v0.screenpos.y, v1.screenpos.y);
 	int entireX2 = std::max(v0.screenpos.x, v1.screenpos.x) - 1;
 	int entireY2 = std::max(v0.screenpos.y, v1.screenpos.y) - 1;
-	int minX = std::max(entireX1 & ~(SCREEN_SCALE_FACTOR - 1), range.x1) | (SCREEN_SCALE_FACTOR / 2 - 1);
-	int minY = std::max(entireY1 & ~(SCREEN_SCALE_FACTOR - 1), range.y1) | (SCREEN_SCALE_FACTOR / 2 - 1);
+	int minX = std::max<int>(entireX1 & ~(SCREEN_SCALE_FACTOR - 1), range.x1) | (SCREEN_SCALE_FACTOR / 2 - 1);
+	int minY = std::max<int>(entireY1 & ~(SCREEN_SCALE_FACTOR - 1), range.y1) | (SCREEN_SCALE_FACTOR / 2 - 1);
 	int maxX = std::min(entireX2, range.x2);
 	int maxY = std::min(entireY2, range.y2);
 
@@ -1479,8 +1479,8 @@ void ClearRectangle(const VertexData &v0, const VertexData &v1, const BinCoords 
 	int entireY1 = std::min(v0.screenpos.y, v1.screenpos.y);
 	int entireX2 = std::max(v0.screenpos.x, v1.screenpos.x) - 1;
 	int entireY2 = std::max(v0.screenpos.y, v1.screenpos.y) - 1;
-	int minX = std::max(entireX1 & ~(SCREEN_SCALE_FACTOR - 1), range.x1) | (SCREEN_SCALE_FACTOR / 2 - 1);
-	int minY = std::max(entireY1 & ~(SCREEN_SCALE_FACTOR - 1), range.y1) | (SCREEN_SCALE_FACTOR / 2 - 1);
+	int minX = std::max<int>(entireX1 & ~(SCREEN_SCALE_FACTOR - 1), range.x1) | (SCREEN_SCALE_FACTOR / 2 - 1);
+	int minY = std::max<int>(entireY1 & ~(SCREEN_SCALE_FACTOR - 1), range.y1) | (SCREEN_SCALE_FACTOR / 2 - 1);
 	int maxX = std::min(entireX2, range.x2);
 	int maxY = std::min(entireY2, range.y2);
 

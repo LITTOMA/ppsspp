@@ -30,7 +30,9 @@
 #include "GPU/Common/ShaderCommon.h"
 #include "GPU/GPUState.h"
 
-#if PPSSPP_ARCH(ARM)
+#if PPSSPP_PLATFORM(3DS)
+#include "Common/FakeEmitter.h"
+#elif PPSSPP_ARCH(ARM)
 #include "Common/ArmEmitter.h"
 #elif PPSSPP_ARCH(ARM64)
 #include "Common/Arm64Emitter.h"
@@ -323,7 +325,8 @@ const char *GetStepFunctionName(StepFunction func);
 //
 // that's it!
 
-#if PPSSPP_ARCH(ARM)
+#if PPSSPP_PLATFORM(3DS)
+#elif PPSSPP_ARCH(ARM)
 #define VERTEXDECODER_JIT_BACKEND ArmGen::ARMXCodeBlock
 #elif PPSSPP_ARCH(ARM64)
 #define VERTEXDECODER_JIT_BACKEND Arm64Gen::ARM64CodeBlock

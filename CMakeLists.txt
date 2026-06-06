@@ -3,6 +3,26 @@ cmake_minimum_required(VERSION 3.16)
 project(PPSSPP)
 enable_testing()
 
+if("${PPSSPP_PLATFORM}" STREQUAL "3DS" OR "${PPSSPP_TARGET}" STREQUAL "3DS" OR N3DS)
+	set(N3DS ON)
+	set(MOBILE_DEVICE ON)
+	set(USING_EGL OFF)
+	set(USING_GLES2 OFF)
+	set(USING_FBDEV OFF)
+	set(USE_FFMPEG OFF)
+	set(USE_DISCORD OFF)
+	set(USE_MINIUPNPC OFF)
+	set(USE_SYSTEM_LIBPNG OFF)
+	set(USE_SYSTEM_LIBZIP OFF)
+	set(USE_SYSTEM_ZSTD OFF)
+	set(HEADLESS OFF)
+	set(ATLAS_TOOL OFF)
+	set(UNITTEST OFF)
+	set(HTTPS_NOT_AVAILABLE ON)
+	set(USE_NO_MMAP ON)
+	add_compile_definitions(__3DS__ _3DS)
+endif()
+
 #This is supposed to work but doesn't!
 if(NOT ANDROID)
 	set(CMAKE_CXX_STANDARD 17)
@@ -311,7 +331,7 @@ elseif(NOT OPENGL_LIBRARIES AND USING_GLES2)
 	set(OPENGL_LIBRARIES GLESv2 EGL)
 endif()
 
-if(NOT OPENGL_LIBRARIES)
+if(NOT OPENGL_LIBRARIES AND NOT N3DS)
 	if(POLICY CMP0072)
 		cmake_policy(SET CMP0072 NEW)
 	endif()
@@ -325,7 +345,7 @@ if(USING_EGL)
 	list(APPEND OPENGL_LIBRARIES ${EGL_LIBRARIES})
 endif()
 
-if(NOT LIBRETRO AND NOT IOS AND NOT MACOSX)
+if(NOT LIBRETRO AND NOT IOS AND NOT MACOSX AND NOT N3DS)
 	find_package(SDL2)
 	find_package(SDL2_ttf)
 	find_package(Fontconfig)
@@ -653,6 +673,15 @@ include_directories(ext/OpenXR-SDK/include)
 # For ext/sol includes, that are usually included as sol/*.hpp
 include_directories(ext)
 
+if(N3DS)
+	set(CommonX86)
+	set(CommonARM64)
+	set(CommonRISCV64)
+	set(CommonLOONGARCH64)
+	set(CommonD3D)
+	set(CommonVR)
+endif()
+
 add_library(Common STATIC
 	${CommonX86}
 	${CommonARM}
@@ -953,6 +982,18 @@ add_library(Common STATIC
 	Common/TimeUtil.h
 )
 
+if(N3DS)
+	get_target_property(PPSSPP_COMMON_SOURCES Common SOURCES)
+	list(FILTER PPSSPP_COMMON_SOURCES EXCLUDE REGEX "^Common/GPU/OpenGL/")
+	list(FILTER PPSSPP_COMMON_SOURCES EXCLUDE REGEX "^Common/GPU/Vulkan/")
+	list(REMOVE_ITEM PPSSPP_COMMON_SOURCES
+		Common/GPU/ShaderTranslation.cpp
+		Common/Net/HTTPServer.cpp
+		Common/Net/WebsocketServer.cpp
+	)
+	set_target_properties(Common PROPERTIES SOURCES "${PPSSPP_COMMON_SOURCES}")
+endif()
+
 if(LIBRETRO)
 	target_include_directories(Common PRIVATE libretro/libretro-common/include)
 endif()
@@ -982,7 +1023,7 @@ if(TARGET Ext::GLEW)
 	target_link_libraries(Common Ext::GLEW)
 endif()
 
-if(USING_GLES2 OR (USING_EGL AND NOT USING_FBDEV))
+if((USING_GLES2 OR (USING_EGL AND NOT USING_FBDEV)) AND NOT N3DS)
 	find_package(X11)
 endif()
 
@@ -1934,6 +1975,16 @@ list(APPEND CoreExtra
 	GPU/Common/VertexDecoderLoongArch64.cpp
 )
 
+if(N3DS)
+	list(FILTER CoreExtra EXCLUDE REGEX "^Core/MIPS/(IR|ARM|ARM64|x86|RiscV|LoongArch64)/")
+	list(FILTER CoreExtra EXCLUDE REGEX "^GPU/Common/VertexDecoder(Arm|Arm64|X86|RiscV|LoongArch64)\\.cpp$")
+	list(FILTER CoreExtra EXCLUDE REGEX "^GPU/Software/(DrawPixelX86|SamplerX86)\\.cpp$")
+	list(APPEND CoreExtra
+		Core/MIPS/fake/FakeJit.cpp
+		Core/MIPS/fake/FakeJit.h
+	)
+endif()
+
 if(NOT MOBILE_DEVICE)
 	list(APPEND CoreExtra
 		Core/AVIDump.cpp
@@ -2000,7 +2051,11 @@ set(GPU_D3D11
 )
 
 # We build Vulkan even on Apple to avoid annoying build differences.
-set(GPU_IMPLS ${GPU_GLES} ${GPU_VULKAN})
+if(N3DS)
+	set(GPU_IMPLS)
+else()
+	set(GPU_IMPLS ${GPU_GLES} ${GPU_VULKAN})
+endif()
 if(WIN32)
 	list(APPEND GPU_IMPLS ${GPU_D3D11})
 endif()
@@ -2138,6 +2193,12 @@ endif()
 if(LINUX OR ANDROID OR MACOSX OR IOS OR BSD)
 	list(APPEND aemu_postoffice
 		ext/aemu_postoffice/client/sock_impl_linux.c
+	)
+endif()
+
+if(N3DS)
+	set(aemu_postoffice
+		Core/HLE/Postoffice3DSStubs.c
 	)
 endif()
 
@@ -2588,6 +2649,16 @@ add_library(${CoreLibName} ${CoreLinkType}
 	${CMAKE_CURRENT_BINARY_DIR}/git-version.cpp
 )
 
+if(N3DS)
+	get_target_property(PPSSPP_CORE_SOURCES ${CoreLibName} SOURCES)
+	list(FILTER PPSSPP_CORE_SOURCES EXCLUDE REGEX "^Core/Debugger/WebSocket/")
+	list(REMOVE_ITEM PPSSPP_CORE_SOURCES
+		Core/Debugger/WebSocket.cpp
+		Core/Debugger/WebSocket.h
+	)
+	set_target_properties(${CoreLibName} PROPERTIES SOURCES "${PPSSPP_CORE_SOURCES}")
+endif()
+
 if((MACOSX OR IOS) AND NOT LIBRETRO)
 	set_source_files_properties(Core/Util/DarwinFileSystemServices.mm
 		PROPERTIES COMPILE_FLAGS -fobjc-arc)
@@ -2611,7 +2682,11 @@ list(APPEND CoreExtraLibs armips)
 #	target_link_libraries(native X11-xcb X11)
 #endif()
 
-set(GlslangLibs glslang OGLCompiler OSDependent SPIRV spirv-cross-glsl)
+if(N3DS)
+	set(GlslangLibs)
+else()
+	set(GlslangLibs glslang OGLCompiler OSDependent SPIRV spirv-cross-glsl)
+endif()
 
 if (ENABLE_SPVREMAPPER)
 	list(APPEND GlslangLibs SPVRemapper)
@@ -2642,6 +2717,12 @@ if(USE_SYSTEM_LIBCHDR)
 	endif()
 else()
 	include_directories(ext/libchdr/include)
+endif()
+
+if(N3DS)
+	set(OPENGL_LIBRARIES)
+	set(X11_LIBRARIES)
+	set(CMAKE_DL_LIBS)
 endif()
 
 target_link_libraries(${CoreLibName} Common native chdr kirk cityhash sfmt19937 xbrz xxhash rcheevos minimp3 at3_standalone lua ${GlslangLibs}
@@ -3121,6 +3202,10 @@ if(TargetBin)
 		target_link_options(${TargetBin} PRIVATE "-Wl,-z,max-page-size=16384")
 	endif()
 	target_link_libraries(${TargetBin} ${LinkCommon} Common)
+endif()
+
+if(N3DS)
+	add_subdirectory(3DS)
 endif()
 
 # installs

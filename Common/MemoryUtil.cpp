@@ -17,7 +17,59 @@
 
 #include "ppsspp_config.h"
 
-#if !PPSSPP_PLATFORM(SWITCH)
+#if PPSSPP_PLATFORM(3DS)
+
+#include <cstdlib>
+#include <malloc.h>
+
+#include "Common/MemoryUtil.h"
+
+void *AllocateExecutableMemory(size_t size) {
+	return AllocateAlignedMemory(size, GetMemoryProtectPageSize());
+}
+
+void FreeExecutableMemory(void *ptr, size_t size) {
+	(void)size;
+	FreeAlignedMemory(ptr);
+}
+
+void *AllocateMemoryPages(size_t size, uint32_t memProtFlags) {
+	(void)memProtFlags;
+	return AllocateAlignedMemory(size, GetMemoryProtectPageSize());
+}
+
+void FreeMemoryPages(void *ptr, size_t size) {
+	(void)size;
+	FreeAlignedMemory(ptr);
+}
+
+void *AllocateAlignedMemory(size_t size, size_t alignment) {
+	if (alignment < sizeof(void *)) {
+		alignment = sizeof(void *);
+	}
+	return memalign(alignment, size);
+}
+
+void FreeAlignedMemory(void *ptr) {
+	free(ptr);
+}
+
+bool PlatformIsWXExclusive() {
+	return false;
+}
+
+bool ProtectMemoryPages(const void *ptr, size_t size, uint32_t memProtFlags) {
+	(void)ptr;
+	(void)size;
+	(void)memProtFlags;
+	return true;
+}
+
+int GetMemoryProtectPageSize() {
+	return 0x1000;
+}
+
+#elif !PPSSPP_PLATFORM(SWITCH)
 #include <cstring>
 #include <cstdlib>
 

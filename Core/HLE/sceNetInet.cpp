@@ -962,6 +962,13 @@ static int sceNetInetSendto(int socket, u32 bufferPtr, int len, int flags, u32 t
 // Similar to POSIX's sendmsg or Winsock2's WSASendMsg? Are their packets compatible one another?
 // Games using this: The Warrior's Code
 static int sceNetInetSendmsg(int socket, u32 msghdrPtr, int flags) {
+#if PPSSPP_PLATFORM(3DS)
+	(void)socket;
+	(void)msghdrPtr;
+	(void)flags;
+	UpdateErrnoFromHost(__KernelGetCurThread(), EOPNOTSUPP, __FUNCTION__);
+	return hleLogError(Log::sceNet, -1, "sendmsg unsupported on 3DS");
+#else
 	// Note: sendmsg is concatenating iovec buffers before sending it, and send/sendto is just a wrapper for sendmsg according to https://stackoverflow.com/questions/4258834/how-sendmsg-works
 	int retval = -1;
 	if (!Memory::IsValidAddress(msghdrPtr)) {
@@ -1155,11 +1162,19 @@ static int sceNetInetSendmsg(int socket, u32 msghdrPtr, int flags) {
 		}
 	}
 	return hleLogInfo(Log::sceNet, retval); // returns number of bytes sent?
+#endif
 }
 
 // Similar to POSIX's recvmsg or Mswsock's WSARecvMsg? Are their packets compatible one another?
 // Games using this: World of Poker
 static int sceNetInetRecvmsg(int socket, u32 msghdrPtr, int flags) {
+#if PPSSPP_PLATFORM(3DS)
+	(void)socket;
+	(void)msghdrPtr;
+	(void)flags;
+	UpdateErrnoFromHost(__KernelGetCurThread(), EOPNOTSUPP, __FUNCTION__);
+	return hleLogError(Log::sceNet, -1, "recvmsg unsupported on 3DS");
+#else
 	ERROR_LOG(Log::sceNet, "UNIMPL %s(%i, %08x, %08x) at %08x", __FUNCTION__, socket, msghdrPtr, flags, currentMIPS->pc);
 
 	InetSocket *inetSock;
@@ -1202,6 +1217,7 @@ static int sceNetInetRecvmsg(int socket, u32 msghdrPtr, int flags) {
 	free(iov);
 
 	return hleLogError(Log::sceNet, retval); // returns number of bytes received?
+#endif
 }
 
 // TODO: fix retmasks

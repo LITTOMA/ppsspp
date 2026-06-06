@@ -890,7 +890,7 @@ float vfpu_dot(const float a[4], const float b[4]) {
 
 // Redundant currently, since MIPSState::Init() already
 // does this on its own, but left as-is to be self-contained.
-void vrnd_init_default(uint32_t *rcx) {
+void vrnd_init_default(u32 *rcx) {
 	rcx[0] = 0x00000001;
 	rcx[1] = 0x00000002;
 	rcx[2] = 0x00000004;
@@ -901,7 +901,7 @@ void vrnd_init_default(uint32_t *rcx) {
 	rcx[7] = 0x00000000;
 }
 
-void vrnd_init(uint32_t seed, uint32_t *rcx) {
+void vrnd_init(u32 seed, u32 *rcx) {
 	for(int i = 0; i < 8; ++i) rcx[i] =
 		0x3F800000u |                          // 1.0f mask.
 		((seed >> ((i / 4) * 16)) & 0xFFFFu) | // lower or upper half of the seed.
@@ -909,7 +909,7 @@ void vrnd_init(uint32_t seed, uint32_t *rcx) {
 
 }
 
-uint32_t vrnd_generate(uint32_t *rcx) {
+u32 vrnd_generate(u32 *rcx) {
 	// The actual RNG state appears to be 5 parts
 	// (32-bit each) stored into the registers as follows:
 	uint32_t A = (rcx[0] & 0xFFFFu) | (rcx[4] << 16);

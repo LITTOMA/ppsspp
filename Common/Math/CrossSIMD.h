@@ -6,7 +6,9 @@
 
 #pragma once
 
+#include <cmath>
 #include <cstring>
+#include "Common/CommonTypes.h"
 #include "Common/Math/SIMDHeaders.h"
 
 #define TEST_FALLBACK 0
@@ -1673,15 +1675,15 @@ struct Vec4F32 {
 		return temp;
 	}
 
-	static Vec4F32 LoadF24x3_One(const uint32_t *src) {
-		uint32_t shifted[4] = { src[0] << 8, src[1] << 8, src[2] << 8, 0 };
+	static Vec4F32 LoadF24x3_One(const u32 *src) {
+		u32 shifted[4] = { src[0] << 8, src[1] << 8, src[2] << 8, 0 };
 		Vec4F32 temp;
 		memcpy(temp.v, shifted, sizeof(temp.v));
 		return temp;
 	}
 
-	static Vec4F32 LoadF24x4(const uint32_t *src) {
-		return LoadR24x3_One(src);
+	static Vec4F32 LoadF24x4(const u32 *src) {
+		return LoadF24x3_One(src);
 	}
 
 	static Vec4F32 FromVec4S32(Vec4S32 src) {
@@ -1697,7 +1699,7 @@ struct Vec4F32 {
 	Vec4F32 ZeroNaNs() const {
 		Vec4F32 temp;
 		for (int i = 0; i < 4; i++) {
-			temp.v[i] = isnan(v[i]) ? 0.0f : v[i];
+			temp.v[i] = std::isnan(v[i]) ? 0.0f : v[i];
 		}
 		return temp;
 	}
@@ -1705,7 +1707,7 @@ struct Vec4F32 {
 	Vec4F32 CleanNaNInfs() {
 		Vec4F32 temp;
 		for (int i = 0; i < 4; i++) {
-			temp.v[i] = (isnan(v[i]) || isinf(v[i])) ? 0.0f : v[i];
+			temp.v[i] = (std::isnan(v[i]) || std::isinf(v[i])) ? 0.0f : v[i];
 		}
 		return temp;
 	}
@@ -1798,6 +1800,10 @@ struct Vec4F32 {
 
 	Vec4F32 WithLane3One() const {
 		return Vec4F32{ { v[0], v[1], v[2], 1.0f } };
+	}
+
+	Vec4F32 WithLane3From(Vec4F32 other) const {
+		return Vec4F32{ { v[0], v[1], v[2], other.v[3] } };
 	}
 
 	Vec4S32 CompareEq(Vec4F32 other) const {
@@ -1919,6 +1925,10 @@ inline bool AnyZeroSignBit(Vec4F32 value) {
 inline bool AllCompareBitsSet(Vec4S32 value) {
 	if (value.v[0] != 0xFFFFFFFF || value.v[1] != 0xFFFFFFFF || value.v[2] != 0xFFFFFFFF || value.v[3] != 0xFFFFFFFF) return false;
 	return true;
+}
+
+inline bool AnyCompareBitsSet(Vec4S32 value) {
+	return value.v[0] != 0 || value.v[1] != 0 || value.v[2] != 0 || value.v[3] != 0;
 }
 
 struct Vec4U16 {

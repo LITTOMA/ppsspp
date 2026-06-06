@@ -19,10 +19,13 @@
 
 #if !defined(_WIN32) && !defined(ANDROID) && !defined(__APPLE__) && !PPSSPP_PLATFORM(SWITCH)
 
+#include <cstdlib>
+#ifndef NO_MMAP
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#endif
 #include <cerrno>
 #include <cstring>
 #include <string>

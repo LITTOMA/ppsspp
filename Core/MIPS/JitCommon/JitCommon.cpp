@@ -33,13 +33,19 @@
 #include "Core/Util/DisArm64.h"
 #include "Core/Config.h"
 
+#if PPSSPP_PLATFORM(3DS)
+#include "Core/MIPS/fake/FakeJit.h"
+#else
 #include "Core/MIPS/IR/IRJit.h"
 #include "Core/MIPS/JitCommon/JitCommon.h"
 #include "Core/MIPS/JitCommon/JitState.h"
+#endif
+#include "Core/MIPS/JitCommon/JitCommon.h"
 #include "Core/MIPS/MIPSCodeUtils.h"
 #include "Core/MIPS/MIPSTables.h"
 
-#if PPSSPP_ARCH(ARM)
+#if PPSSPP_PLATFORM(3DS)
+#elif PPSSPP_ARCH(ARM)
 #include "../ARM/ArmJit.h"
 #elif PPSSPP_ARCH(ARM64)
 #include "../ARM64/Arm64Jit.h"
@@ -106,7 +112,9 @@ namespace MIPSComp {
 }
 
 	JitInterface *CreateNativeJit(MIPSState *mipsState, bool useIR) {
-#if PPSSPP_ARCH(ARM)
+#if PPSSPP_PLATFORM(3DS)
+		return new MIPSComp::FakeJit(mipsState);
+#elif PPSSPP_ARCH(ARM)
 		return new MIPSComp::ArmJit(mipsState);
 #elif PPSSPP_ARCH(ARM64)
 		if (useIR)

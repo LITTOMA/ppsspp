@@ -1,0 +1,91 @@
+name: Build 3DS
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      use_self_hosted:
+        description: "Also run the self-hosted devkitPro runner job"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+
+jobs:
+  build-devkitpro-container:
+    name: Build PPSSPP.3dsx / PPSSPP.cia in devkitPro Docker
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest
+    env:
+      CI_DKP_INSTALL: "1"
+      REQUIRE_3DS_ARTIFACTS: "1"
+    steps:
+      - name: Prepare devkitPro container
+        run: |
+          if command -v dkp-pacman >/dev/null 2>&1; then
+            dkp-pacman -Sy --noconfirm --needed 3ds-dev
+          fi
+
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build 3DS artifacts
+        run: |
+          chmod +x ci/3ds/*.sh
+          ci/3ds/build-3ds.sh
+
+      - name: Upload 3DS artifacts and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppsspp-3ds-devkitpro-container
+          if-no-files-found: warn
+          path: |
+            artifacts/3ds/**
+            build-3ds/**/*.log
+            build-3ds/CMakeCache.txt
+
+  build-self-hosted-devkitpro:
+    name: Build on self-hosted devkitPro runner
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.use_self_hosted == 'true' }}
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - devkitpro
+      - 3ds
+    env:
+      CI_DKP_INSTALL: "0"
+      REQUIRE_3DS_ARTIFACTS: "1"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build 3DS artifacts
+        run: |
+          chmod +x ci/3ds/*.sh
+          ci/3ds/build-3ds.sh
+
+      - name: Upload 3DS artifacts and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppsspp-3ds-self-hosted
+          if-no-files-found: warn
+          path: |
+            artifacts/3ds/**
+            build-3ds/**/*.log
+            build-3ds/CMakeCache.txt

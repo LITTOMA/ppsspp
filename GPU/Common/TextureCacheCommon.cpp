@@ -1697,8 +1697,8 @@ static CheckAlphaResult DecodeDXTBlocks(uint8_t *out, int outPitch, uint32_t tex
 	int w, int h, int bufw, bool reverseColors) {
 
 	int minw = std::min(bufw, w);
-	uint32_t *dst = (uint32_t *)out;
-	int outPitch32 = outPitch / sizeof(uint32_t);
+	u32 *dst = (u32 *)out;
+	int outPitch32 = outPitch / sizeof(u32);
 	const DXTBlock *src = (const DXTBlock *)texptr;
 
 	if (!Memory::IsValidRange(texaddr, ((h + 3) / 4) * (bufw / 4) * sizeof(DXTBlock))) {

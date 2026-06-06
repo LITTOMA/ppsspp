@@ -617,7 +617,10 @@ bool GEExpressionFunctions::parseSymbol(char *str, uint32_t &symbolValue) {
 		}
 	}
 
-	return g_symbolMap->GetLabelValue(str, symbolValue);
+	u32 value = 0;
+	bool result = g_symbolMap->GetLabelValue(str, value);
+	symbolValue = value;
+	return result;
 }
 
 uint32_t GEExpressionFunctions::getReferenceValue(uint32_t referenceIndex) {

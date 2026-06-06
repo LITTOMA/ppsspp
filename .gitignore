@@ -137,6 +137,11 @@ debian/ppsspp/
 CMakeFiles
 CMakeUserPresets.json
 compile_commands.json
+artifacts/
+_ppsspp-artifacts-full/
+_ppsspp-build-full/
+_ppsspp-source/
+_layout-backup-*/
 
 # Clangd 
 .cache/

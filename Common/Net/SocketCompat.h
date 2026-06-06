@@ -13,13 +13,17 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/select.h>
+#if !PPSSPP_PLATFORM(3DS)
 #include <sys/mman.h>
+#endif
+#if !PPSSPP_PLATFORM(3DS)
 #include <net/if.h>
+#endif
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#if !PPSSPP_PLATFORM(SWITCH)
+#if !PPSSPP_PLATFORM(SWITCH) && !PPSSPP_PLATFORM(3DS)
 #include <ifaddrs.h>
 #endif
 #include <fcntl.h>
@@ -40,6 +44,18 @@ extern "C" struct hostent *gethostbyname(const char *name);
 #if PPSSPP_PLATFORM(SWITCH) && !defined(INADDR_NONE)
 // Missing toolchain define
 #define INADDR_NONE 0xFFFFFFFF
+#endif
+
+#if PPSSPP_PLATFORM(3DS)
+#ifndef SOMAXCONN
+#define SOMAXCONN 1
+#endif
+#ifndef SO_SNDTIMEO
+#define SO_SNDTIMEO 0x01000014
+#endif
+#ifndef SO_RCVTIMEO
+#define SO_RCVTIMEO 0x01000015
+#endif
 #endif
 
 // TODO: move this to some common set

@@ -1,0 +1,46 @@
+FROM devkitpro/devkitarm:latest
+
+ARG RUNNER_VERSION=2.334.0
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    DEVKITPRO=/opt/devkitpro \
+    DEVKITARM=/opt/devkitpro/devkitARM
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+      ca-certificates curl g++ gcc git gzip jq make cmake ninja-build sudo tar unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN dkp-pacman -Sy --noconfirm --needed 3ds-dev
+
+RUN git clone --depth 1 --branch makerom-v0.19.0 https://github.com/3DSGuy/Project_CTR.git /tmp/Project_CTR \
+    && make -C /tmp/Project_CTR/makerom deps \
+    && make -C /tmp/Project_CTR/makerom -j"$(nproc)" \
+    && install -m 0755 /tmp/Project_CTR/makerom/bin/makerom "${DEVKITPRO}/tools/bin/makerom" \
+    && rm -rf /tmp/Project_CTR
+
+RUN useradd -m -s /bin/bash runner \
+    && mkdir -p /actions-runner /_work \
+    && chown -R runner:runner /actions-runner /_work
+
+USER runner
+WORKDIR /actions-runner
+
+RUN curl -fsSL -o actions-runner.tar.gz \
+      "https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz" \
+    && tar xzf actions-runner.tar.gz \
+    && rm actions-runner.tar.gz
+
+USER root
+RUN /actions-runner/bin/installdependencies.sh || true
+
+COPY ci/3ds/runner-entrypoint.sh /usr/local/bin/runner-entrypoint.sh
+RUN chmod +x /usr/local/bin/runner-entrypoint.sh \
+    && chown runner:runner /usr/local/bin/runner-entrypoint.sh
+
+USER runner
+WORKDIR /actions-runner
+
+ENTRYPOINT ["/usr/local/bin/runner-entrypoint.sh"]

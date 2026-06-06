@@ -15,6 +15,52 @@
 // Official git repository and contact information can be found at
 // https://github.com/hrydgard/ppsspp and http://www.ppsspp.org/.
 
+#include "ppsspp_config.h"
+
+#if PPSSPP_PLATFORM(3DS)
+
+#include "Core/WebServer.h"
+
+bool StartWebServer(WebServerFlags flags) {
+	return false;
+}
+
+bool StopWebServer(WebServerFlags flags) {
+	return true;
+}
+
+bool WebServerStopping(WebServerFlags flags) {
+	return false;
+}
+
+bool WebServerStopped(WebServerFlags flags) {
+	return true;
+}
+
+bool WebServerRunning(WebServerFlags flags) {
+	return false;
+}
+
+void ShutdownWebServer() {
+}
+
+bool RemoteISOFileSupported(const std::string &filename) {
+	return false;
+}
+
+void WebServerSetUploadPath(const Path &path) {
+}
+
+int WebServerPort() {
+	return 0;
+}
+
+std::vector<UploadProgress> GetUploadsInProgress() {
+	return {};
+}
+
+#else
+
 #include <algorithm>
 #include <mutex>
 #include <thread>
@@ -869,3 +915,5 @@ bool WebServerRunning(WebServerFlags flags) {
 int WebServerPort() {
 	return g_Config.iRemoteISOPort;
 }
+
+#endif

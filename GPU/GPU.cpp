@@ -25,10 +25,12 @@
 #include "GPU/GPU.h"
 #include "GPU/GPUCommon.h"
 
-#if PPSSPP_API(ANY_GL)
+#if PPSSPP_API(ANY_GL) && !PPSSPP_PLATFORM(3DS)
 #include "GPU/GLES/GPU_GLES.h"
 #endif
+#if !PPSSPP_PLATFORM(3DS)
 #include "GPU/Vulkan/GPU_Vulkan.h"
+#endif
 #include "GPU/Software/SoftGpu.h"
 
 #if PPSSPP_API(D3D11)
@@ -46,7 +48,7 @@ static GPUCommon *CreateGPUCore(GPUCore gpuCore, GraphicsContext *ctx, Draw::Dra
 	switch (gpuCore) {
 	case GPUCORE_GLES:
 		// Disable GLES on ARM Windows (but leave it enabled on other ARM platforms).
-#if PPSSPP_API(ANY_GL)
+#if PPSSPP_API(ANY_GL) && !PPSSPP_PLATFORM(3DS)
 		return new GPU_GLES(ctx, draw);
 #else
 		return nullptr;
@@ -59,7 +61,7 @@ static GPUCommon *CreateGPUCore(GPUCore gpuCore, GraphicsContext *ctx, Draw::Dra
 #else
 		return nullptr;
 #endif
-#if !PPSSPP_PLATFORM(SWITCH) && !PPSSPP_PLATFORM(UWP)
+#if !PPSSPP_PLATFORM(SWITCH) && !PPSSPP_PLATFORM(UWP) && !PPSSPP_PLATFORM(3DS)
 	case GPUCORE_VULKAN:
 		if (!ctx) {
 			// Can this happen?

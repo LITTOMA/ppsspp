@@ -142,83 +142,128 @@ u16 Read_U16(const u32 _Address);
 u32 Read_U32(const u32 _Address);
 u64 Read_U64(const u32 _Address);
 
+#if PPSSPP_PLATFORM(3DS)
+u8 *GetPointerWriteUnchecked3DS(const u32 address);
+const u8 *GetPointerUnchecked3DS(const u32 address);
+#endif
+
 inline u8* GetPointerWriteUnchecked(const u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	return GetPointerWriteUnchecked3DS(address);
+#else
 #ifdef MASKED_PSP_MEMORY
 	return (u8 *)(base + (address & MEMVIEW32_MASK));
 #else
 	return (u8 *)(base + address);
 #endif
+#endif
 }
 
 inline const u8* GetPointerUnchecked(const u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	return GetPointerUnchecked3DS(address);
+#else
 #ifdef MASKED_PSP_MEMORY
 	return (const u8 *)(base + (address & MEMVIEW32_MASK));
 #else
 	return (const u8 *)(base + address);
 #endif
+#endif
 }
 
 inline u32 ReadUnchecked_U32(const u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	return *(u32_le *)GetPointerUnchecked3DS(address);
+#else
 #ifdef MASKED_PSP_MEMORY
 	return *(u32_le *)(base + (address & MEMVIEW32_MASK));
 #else
 	return *(u32_le *)(base + address);
 #endif
+#endif
 }
 
 inline float ReadUnchecked_Float(const u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	return *(float_le *)GetPointerUnchecked3DS(address);
+#else
 #ifdef MASKED_PSP_MEMORY
 	return *(float_le *)(base + (address & MEMVIEW32_MASK));
 #else
 	return *(float_le *)(base + address);
 #endif
+#endif
 }
 
 inline u16 ReadUnchecked_U16(const u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	return *(u16_le *)GetPointerUnchecked3DS(address);
+#else
 #ifdef MASKED_PSP_MEMORY
 	return *(u16_le *)(base + (address & MEMVIEW32_MASK));
 #else
 	return *(u16_le *)(base + address);
 #endif
+#endif
 }
 
 inline u8 ReadUnchecked_U8(const u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	return *GetPointerUnchecked3DS(address);
+#else
 #ifdef MASKED_PSP_MEMORY
 	return (*(u8 *)(base + (address & MEMVIEW32_MASK)));
 #else
 	return (*(u8 *)(base + address));
 #endif
+#endif
 }
 
 inline void WriteUnchecked_U32(u32 data, u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	*(u32_le *)GetPointerWriteUnchecked3DS(address) = data;
+#else
 #ifdef MASKED_PSP_MEMORY
 	*(u32_le *)(base + (address & MEMVIEW32_MASK)) = data;
 #else
 	*(u32_le *)(base + address) = data;
 #endif
+#endif
 }
 
 inline void WriteUnchecked_Float(float data, u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	*(float_le *)GetPointerWriteUnchecked3DS(address) = data;
+#else
 #ifdef MASKED_PSP_MEMORY
 	*(float_le *)(base + (address & MEMVIEW32_MASK)) = data;
 #else
 	*(float_le *)(base + address) = data;
 #endif
+#endif
 }
 
 inline void WriteUnchecked_U16(u16 data, u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	*(u16_le *)GetPointerWriteUnchecked3DS(address) = data;
+#else
 #ifdef MASKED_PSP_MEMORY
 	*(u16_le *)(base + (address & MEMVIEW32_MASK)) = data;
 #else
 	*(u16_le *)(base + address) = data;
 #endif
+#endif
 }
 
 inline void WriteUnchecked_U8(u8 data, u32 address) {
+#if PPSSPP_PLATFORM(3DS)
+	*GetPointerWriteUnchecked3DS(address) = data;
+#else
 #ifdef MASKED_PSP_MEMORY
 	(*(u8 *)(base + (address & MEMVIEW32_MASK))) = data;
 #else
 	(*(u8 *)(base + address)) = data;
+#endif
 #endif
 }
 

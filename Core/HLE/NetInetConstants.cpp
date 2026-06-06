@@ -11,6 +11,79 @@
 #include <mswsock.h>
 #endif
 
+#if PPSSPP_PLATFORM(3DS)
+#ifndef MSG_TRUNC
+#define MSG_TRUNC 0x01000001
+#endif
+#ifndef MSG_CTRUNC
+#define MSG_CTRUNC 0x01000002
+#endif
+#ifdef MSG_WAITALL
+#undef MSG_WAITALL
+#endif
+#define MSG_WAITALL 0x01000003
+#ifndef AF_UNIX
+#define AF_UNIX (-1001)
+#endif
+#ifndef SOCK_RAW
+#define SOCK_RAW 0x01000004
+#endif
+#ifndef SOCK_RDM
+#define SOCK_RDM 0x01000005
+#endif
+#ifndef SOCK_SEQPACKET
+#define SOCK_SEQPACKET 0x01000006
+#endif
+#ifndef IPPROTO_ICMP
+#define IPPROTO_ICMP 0x01000007
+#endif
+#ifndef IPPROTO_IGMP
+#define IPPROTO_IGMP 0x01000008
+#endif
+#ifndef IPPROTO_EGP
+#define IPPROTO_EGP 0x01000009
+#endif
+#ifndef IPPROTO_PUP
+#define IPPROTO_PUP 0x0100000A
+#endif
+#ifndef IPPROTO_IDP
+#define IPPROTO_IDP 0x0100000B
+#endif
+#ifndef IPPROTO_RAW
+#define IPPROTO_RAW 0x0100000C
+#endif
+#ifndef IP_OPTIONS
+#define IP_OPTIONS 0x0100000D
+#endif
+#ifndef IP_HDRINCL
+#define IP_HDRINCL 0x0100000E
+#endif
+#ifndef IP_MULTICAST_IF
+#define IP_MULTICAST_IF 0x0100000F
+#endif
+#ifndef SO_DEBUG
+#define SO_DEBUG 0x01000010
+#endif
+#ifndef SO_ACCEPTCONN
+#define SO_ACCEPTCONN 0x01000011
+#endif
+#ifndef SO_KEEPALIVE
+#define SO_KEEPALIVE 0x01000012
+#endif
+#ifndef SO_DONTROUTE
+#define SO_DONTROUTE 0x01000013
+#endif
+#ifndef SO_SNDTIMEO
+#define SO_SNDTIMEO 0x01000014
+#endif
+#ifndef SO_RCVTIMEO
+#define SO_RCVTIMEO 0x01000015
+#endif
+#ifndef ESOCKTNOSUPPORT
+#define ESOCKTNOSUPPORT 0x01000016
+#endif
+#endif
+
 int convertMsgFlagPSP2Host(int flag) {
 	switch (flag) {
 	case PSP_NET_INET_MSG_OOB:
@@ -833,8 +906,10 @@ int convertInetErrnoHost2PSP(int error) {
 		return ERROR_INET_ENOTSOCK;
 	case ENOPROTOOPT:
 		return ERROR_INET_ENOPROTOOPT;
+#if !defined(ENETDOWN) || ESHUTDOWN != ENETDOWN
 	case ESHUTDOWN:
 		return ERROR_INET_ESHUTDOWN;
+#endif
 	case ECONNREFUSED:
 		return ERROR_INET_ECONNREFUSED;
 	case EADDRINUSE:

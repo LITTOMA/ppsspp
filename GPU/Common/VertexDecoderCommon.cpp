@@ -1683,6 +1683,9 @@ VertexDecoderJitCache::VertexDecoderJitCache()
  : fp(this)
 #endif
 {
+#if PPSSPP_PLATFORM(3DS)
+	// 3DS builds use the interpreter/software path and do not allocate JIT code.
+#else
 	// 256k should be enough.
 	AllocCodeSpace(1024 * 64 * 4);
 
@@ -1697,12 +1700,15 @@ VertexDecoderJitCache::VertexDecoderJitCache()
 	BKPT(0);
 	BKPT(0);
 #endif
+#endif
 }
 
 void VertexDecoderJitCache::Clear() {
+#if !PPSSPP_PLATFORM(3DS)
 	if (g_Config.iCpuCore == (int)CPUCore::JIT || g_Config.iCpuCore == (int)CPUCore::JIT_IR) {
 		ClearCodeSpace(0);
 	}
+#endif
 }
 
 struct StepFunctionNameEntry {

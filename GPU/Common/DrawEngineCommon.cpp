@@ -722,12 +722,12 @@ int DrawEngineCommon::ComputeNumVertsToDecode() const {
 // Takes a list of consecutive PRIM opcodes, and extends the current draw call to include them.
 // This is just a performance optimization. NOTE: This isn't compatible with really accurate culling,
 // unless we refactor things a bit.
-int DrawEngineCommon::ExtendNonIndexedPrim(const uint32_t *cmd, const uint32_t *stall, const VertexDecoder *dec, u32 vertTypeID, bool clockwise, int *bytesRead, bool isTriangle, ClipInfoFlags clipInfoFlags) {
+int DrawEngineCommon::ExtendNonIndexedPrim(const u32_le *cmd, const u32_le *stall, const VertexDecoder *dec, u32 vertTypeID, bool clockwise, int *bytesRead, bool isTriangle, ClipInfoFlags clipInfoFlags) {
 	if (clipInfoFlags & ClipInfoFlags::Valid) {
 		clipInfoFlags_ |= clipInfoFlags;
 	}
 
-	const uint32_t *start = cmd;
+	const u32_le *start = cmd;
 	int prevDrawVerts = numDrawVerts_ - 1;
 	DeferredVerts &dv = drawVerts_[prevDrawVerts];
 	int offset = dv.vertexCount;

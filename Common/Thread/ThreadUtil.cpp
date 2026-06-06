@@ -57,7 +57,9 @@ void RegisterAttachDetach(AttachDetachFunc attach, AttachDetachFunc detach) {
 #include <pthread.h>
 #include <sys/types.h>
 #include <unistd.h>
+#if !PPSSPP_PLATFORM(3DS)
 #include <sys/syscall.h>
+#endif
 #endif
 
 #if defined(__DragonFly__) || defined(__FreeBSD__) || defined(__OpenBSD__)
@@ -139,7 +141,7 @@ void SetCurrentThreadName(const char *threadName) {
 	wchar_t buffer[256];
 	ConvertUTF8ToWString(buffer, ARRAY_SIZE(buffer), threadName);
 	SetThreadDescription(GetCurrentThread(), buffer);
-#elif PPSSPP_PLATFORM(ANDROID) || PPSSPP_PLATFORM(LINUX)
+#elif (PPSSPP_PLATFORM(ANDROID) || PPSSPP_PLATFORM(LINUX)) && !PPSSPP_PLATFORM(3DS)
 	pthread_setname_np(pthread_self(), threadName);
 #elif defined(__APPLE__)
 	pthread_setname_np(threadName);
@@ -227,6 +229,8 @@ int GetCurrentThreadIdForDebug() {
 	uint64_t tid = 0;
 	pthread_threadid_np(NULL, &tid);
 	return (int)tid;
+#elif PPSSPP_PLATFORM(3DS)
+	return 1;
 #elif PPSSPP_PLATFORM(ANDROID) || PPSSPP_PLATFORM(LINUX)
 	// See issue 14545
 	return (int)syscall(__NR_gettid);

@@ -15,6 +15,8 @@
 // Official git repository and contact information can be found at
 // https://github.com/hrydgard/ppsspp and http://www.ppsspp.org/.
 
+#include "ppsspp_config.h"
+
 #ifdef _WIN32
 #include "Common/CommonWindows.h"
  // timeval already defined in xtl.h
@@ -76,6 +78,20 @@ const int PSP_TIME_INVALID_HOUR = -4;
 const int PSP_TIME_INVALID_MINUTES = -5;
 const int PSP_TIME_INVALID_SECONDS = -6;
 const int PSP_TIME_INVALID_MICROSECONDS = -7;
+
+static int GetLocalTimezoneOffsetSeconds() {
+#ifdef _WIN32
+	long timezone_val;
+	_get_timezone(&timezone_val);
+	return -timezone_val;
+#elif PPSSPP_PLATFORM(3DS) || defined(_AIX) || defined(__sgi) || defined(__hpux) || defined(HAVE_LIBNX)
+	return 0;
+#else
+	time_t timezone = 0;
+	tm *time = localtime(&timezone);
+	return time ? (int)time->tm_gmtoff : 0;
+#endif
+}
 
 u64 __RtcGetCurrentTick()
 {
@@ -439,15 +455,7 @@ static int sceRtcConvertLocalTimeToUTC(u32 tickLocalPtr,u32 tickUTCPtr)
 	{
 		u64 srcTick = Memory::Read_U64(tickLocalPtr);
 		// TODO : Let the user select his timezone / daylight saving instead of taking system param ?
-#ifdef _WIN32
-		long timezone_val;
-		_get_timezone(&timezone_val);
-		srcTick -= -timezone_val * 1000000ULL;
-#elif !defined(_AIX) && !defined(__sgi) && !defined(__hpux) && !defined(HAVE_LIBNX)
-		time_t timezone = 0;
-		tm *time = localtime(&timezone);
-		srcTick -= time->tm_gmtoff*1000000ULL;
-#endif
+		srcTick -= (u64)GetLocalTimezoneOffsetSeconds() * 1000000ULL;
 		Memory::Write_U64(srcTick, tickUTCPtr);
 	}
 	else
@@ -464,15 +472,7 @@ static int sceRtcConvertUtcToLocalTime(u32 tickUTCPtr,u32 tickLocalPtr)
 	{
 		u64 srcTick = Memory::Read_U64(tickUTCPtr);
 		// TODO : Let the user select his timezone / daylight saving instead of taking system param ?
-#ifdef _WIN32
-		long timezone_val;
-		_get_timezone(&timezone_val);
-		srcTick += -timezone_val * 1000000ULL;
-#elif !defined(_AIX) && !defined(__sgi) && !defined(__hpux) && !defined(HAVE_LIBNX)
-		time_t timezone = 0;
-		tm *time = localtime(&timezone);
-		srcTick += time->tm_gmtoff*1000000ULL;
-#endif
+		srcTick += (u64)GetLocalTimezoneOffsetSeconds() * 1000000ULL;
 		Memory::Write_U64(srcTick, tickLocalPtr);
 	}
 	else
@@ -911,16 +911,7 @@ static int sceRtcFormatRFC2822LocalTime(u32 outPtr, u32 srcTickPtr)
 		return -1;
 	}
 
-	int tz_seconds;
-#ifdef _WIN32
-		long timezone_val;
-		_get_timezone(&timezone_val);
-		tz_seconds = -timezone_val;
-#elif !defined(_AIX) && !defined(__sgi) && !defined(__hpux) && !defined(HAVE_LIBNX)
-		time_t timezone = 0;
-		tm *time = localtime(&timezone);
-		tz_seconds = time->tm_gmtoff;
-#endif
+	int tz_seconds = GetLocalTimezoneOffsetSeconds();
 
 	DEBUG_LOG(Log::sceRtc, "sceRtcFormatRFC2822LocalTime(%08x, %08x)", outPtr, srcTickPtr);
 	return __RtcFormatRFC2822(outPtr, srcTickPtr, tz_seconds / 60);
@@ -948,16 +939,7 @@ static int sceRtcFormatRFC3339LocalTime(u32 outPtr, u32 srcTickPtr)
 		return -1;
 	}
 
-	int tz_seconds;
-#ifdef _WIN32
-		long timezone_val;
-		_get_timezone(&timezone_val);
-		tz_seconds = -timezone_val;
-#elif !defined(_AIX) && !defined(__sgi) && !defined(__hpux) && !defined(HAVE_LIBNX)
-		time_t timezone = 0;
-		tm *time = localtime(&timezone);
-		tz_seconds = time->tm_gmtoff;
-#endif
+	int tz_seconds = GetLocalTimezoneOffsetSeconds();
 
 	DEBUG_LOG(Log::sceRtc, "sceRtcFormatRFC3339LocalTime(%08x, %08x)", outPtr, srcTickPtr);
 	return __RtcFormatRFC3339(outPtr, srcTickPtr, tz_seconds / 60);

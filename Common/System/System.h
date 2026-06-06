@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <mutex>
 
+#include "Common/CommonTypes.h"
+
 // Platform integration
 
 // To run the PPSSPP core, a platform needs to implement all the System_ functions in this file.
@@ -335,7 +337,7 @@ void System_AudioClear();
 // This is for pushing rate-controlled 44khz audio from emulation.
 // If you push a little too fast, we'll pitch up to a limit, for example.
 // Volume is a unit-range multiplier.
-void System_AudioPushSamples(const int32_t *audio, int numSamples, float volume);
+void System_AudioPushSamples(const s32 *audio, int numSamples, float volume);
 
 inline void System_AudioResetStatCounters() {
 	return System_AudioGetDebugStats(nullptr, 0);

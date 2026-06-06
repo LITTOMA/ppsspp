@@ -3,8 +3,13 @@
 #include <string_view>
 #include <string>
 #include <memory>
+#include <vector>
 
+#include "ppsspp_config.h"
+
+#if !PPSSPP_PLATFORM(3DS)
 #include "ext/sol/forward.hpp"
+#endif
 
 struct lua_State;
 
@@ -44,7 +49,9 @@ public:
 	void ExecuteConsoleCommand(std::string_view cmd);
 
 private:
+#if !PPSSPP_PLATFORM(3DS)
 	std::unique_ptr<sol::state> lua_;
+#endif
 	std::vector<LuaLogLine> lines_;
 };
 

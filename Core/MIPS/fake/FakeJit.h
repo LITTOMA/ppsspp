@@ -47,6 +47,7 @@ public:
 	void Compile(u32 em_address) override;	// Compiles a block at current MIPS PC
 	void DoJit(u32 em_address, JitBlock *b);
 
+	const u8 *GetCodeBase() const override { return nullptr; }
 	const u8 *GetCrashHandler() const override { return nullptr; }
 	bool CodeInRange(const u8 *ptr) const override { return IsInSpace(ptr); }
 	bool DescribeCodePtr(const u8 *ptr, std::string &name) override;

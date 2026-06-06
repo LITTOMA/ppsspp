@@ -15,7 +15,9 @@
 // Official git repository and contact information can be found at
 // https://github.com/hrydgard/ppsspp and http://www.ppsspp.org/.
 
-#if __linux__ || __APPLE__ || defined(__OpenBSD__)
+#include "ppsspp_config.h"
+
+#if (__linux__ || __APPLE__ || defined(__OpenBSD__)) && !PPSSPP_PLATFORM(3DS)
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/mman.h>

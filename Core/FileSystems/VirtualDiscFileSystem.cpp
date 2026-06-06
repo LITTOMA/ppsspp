@@ -40,7 +40,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#if !PPSSPP_PLATFORM(SWITCH)
+#if !PPSSPP_PLATFORM(SWITCH) && !PPSSPP_PLATFORM(3DS)
 #include <dlfcn.h>
 #endif
 #endif
@@ -820,8 +820,8 @@ void VirtualDiscFileSystem::HandlerLogger(void *arg, HandlerHandle handle, LogLe
 }
 
 VirtualDiscFileSystem::Handler::Handler(const char *filename, VirtualDiscFileSystem *const sys)
-: sys_(sys) {
-#if !PPSSPP_PLATFORM(SWITCH)
+	: library(nullptr), sys_(sys), Init(nullptr), Shutdown(nullptr), ShutdownV2(nullptr), Open(nullptr), Seek(nullptr), Read(nullptr), Close(nullptr) {
+#if !PPSSPP_PLATFORM(SWITCH) && !PPSSPP_PLATFORM(3DS)
 #ifdef _WIN32
 #if PPSSPP_PLATFORM(UWP)
 #define dlopen(name, ignore) (void *)LoadPackagedLibrary(ConvertUTF8ToWString(name).c_str(), 0)
@@ -875,7 +875,7 @@ VirtualDiscFileSystem::Handler::~Handler() {
 		else
 			Shutdown();
 
-#if !PPSSPP_PLATFORM(UWP) && !PPSSPP_PLATFORM(SWITCH)
+#if !PPSSPP_PLATFORM(UWP) && !PPSSPP_PLATFORM(SWITCH) && !PPSSPP_PLATFORM(3DS)
 #ifdef _WIN32
 		FreeLibrary((HMODULE)library);
 #else

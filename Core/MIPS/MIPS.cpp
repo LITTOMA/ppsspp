@@ -20,6 +20,7 @@
 #include <mutex>
 #include <utility>
 
+#include "ppsspp_config.h"
 
 #include "Common/CommonTypes.h"
 #include "Common/Serialize/Serializer.h"
@@ -30,7 +31,9 @@
 #include "Core/MIPS/MIPSTables.h"
 #include "Core/MIPS/MIPSDebugInterface.h"
 #include "Core/MIPS/MIPSVFPUUtils.h"
+#if !PPSSPP_PLATFORM(3DS)
 #include "Core/MIPS/IR/IRJit.h"
+#endif
 #include "Core/Reporting.h"
 #include "Core/Core.h"
 #include "Core/System.h"
@@ -210,6 +213,10 @@ void MIPSState::Init() {
 	memset(vcmpResult, 0, sizeof(vcmpResult));
 
 	std::lock_guard<std::recursive_mutex> guard(MIPSComp::jitLock);
+#if PPSSPP_PLATFORM(3DS)
+	PSP_CoreParameter().cpuCore = CPUCore::INTERPRETER;
+	MIPSComp::jit = nullptr;
+#else
 	if (PSP_CoreParameter().cpuCore == CPUCore::JIT || PSP_CoreParameter().cpuCore == CPUCore::JIT_IR) {
 		MIPSComp::jit = MIPSComp::CreateNativeJit(this, PSP_CoreParameter().cpuCore == CPUCore::JIT_IR);
 	} else if (PSP_CoreParameter().cpuCore == CPUCore::IR_INTERPRETER) {
@@ -217,6 +224,7 @@ void MIPSState::Init() {
 	} else {
 		MIPSComp::jit = nullptr;
 	}
+#endif
 }
 
 bool MIPSState::HasDefaultPrefix() const {
@@ -224,6 +232,9 @@ bool MIPSState::HasDefaultPrefix() const {
 }
 
 void MIPSState::UpdateCore(CPUCore desired) {
+#if PPSSPP_PLATFORM(3DS)
+	desired = CPUCore::INTERPRETER;
+#endif
 	if (PSP_CoreParameter().cpuCore == desired) {
 		return;
 	}
@@ -243,6 +254,7 @@ void MIPSState::UpdateCore(CPUCore desired) {
 
 	MIPSComp::JitInterface *newjit = nullptr;
 	switch (PSP_CoreParameter().cpuCore) {
+#if !PPSSPP_PLATFORM(3DS)
 	case CPUCore::JIT:
 	case CPUCore::JIT_IR:
 		INFO_LOG(Log::CPU, "Switching to JIT%s", PSP_CoreParameter().cpuCore == CPUCore::JIT_IR ? " IR" : "");
@@ -253,6 +265,7 @@ void MIPSState::UpdateCore(CPUCore desired) {
 		INFO_LOG(Log::CPU, "Switching to IR interpreter");
 		newjit = new MIPSComp::IRJit(this, false);
 		break;
+#endif
 
 	case CPUCore::INTERPRETER:
 		INFO_LOG(Log::CPU, "Switching to interpreter");

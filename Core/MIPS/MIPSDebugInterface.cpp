@@ -139,7 +139,10 @@ public:
 
 	bool parseSymbol(char* str, uint32_t& symbolValue) override
 	{
-		return g_symbolMap->GetLabelValue(str,symbolValue); 
+		u32 value = 0;
+		bool result = g_symbolMap->GetLabelValue(str, value);
+		symbolValue = value;
+		return result;
 	}
 
 	uint32_t getReferenceValue(uint32_t referenceIndex) override
@@ -289,7 +292,10 @@ bool initExpression(const DebugInterface *debug, const char* exp, PostfixExpress
 
 bool parseExpression(const DebugInterface *debug, PostfixExpression& exp, u32& dest) {
 	MipsExpressionFunctions funcs(debug);
-	return parsePostfixExpression(exp, &funcs, dest);
+	uint32_t value = dest;
+	bool result = parsePostfixExpression(exp, &funcs, value);
+	dest = (u32)value;
+	return result;
 }
 
 void DisAsm(u32 pc, char *out, size_t outSize) {

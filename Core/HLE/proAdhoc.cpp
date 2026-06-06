@@ -1960,6 +1960,11 @@ uint16_t getLocalPort(int sock) {
 }
 
 u_long getAvailToRecv(int sock, int udpBufferSize) {
+#if PPSSPP_PLATFORM(3DS)
+	(void)sock;
+	(void)udpBufferSize;
+	return 0;
+#else
 	u_long n = 0; // Typical MTU size is 1500
 	int err = -1;
 	// Note: FIONREAD may have different behavior depends on the platform, according to https://stackoverflow.com/questions/9278189/how-do-i-get-amount-of-queued-data-for-udp-socket/9296481#9296481
@@ -1976,6 +1981,7 @@ u_long getAvailToRecv(int sock, int udpBufferSize) {
 		// TODO: Cap number of bytes of full DGRAM message(s) up to buffer size, but may cause Warriors Orochi 2 to get FPS drops
 	}
 	return n;
+#endif
 }
 
 int getSockMaxSize(int udpsock) {
@@ -2103,6 +2109,14 @@ int setUDPConnReset(int udpsock, bool enabled) {
 #endif
 #endif
 int setSockKeepAlive(int sock, bool keepalive, const int keepinvl, const int keepcnt, const int keepidle) {
+#if PPSSPP_PLATFORM(3DS)
+	(void)sock;
+	(void)keepalive;
+	(void)keepinvl;
+	(void)keepcnt;
+	(void)keepidle;
+	return 0;
+#else
 	int optval = keepalive ? 1 : 0;
 	int optlen = sizeof(optval);
 	int result = setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (char*)&optval, optlen);
@@ -2120,6 +2134,7 @@ int setSockKeepAlive(int sock, bool keepalive, const int keepinvl, const int kee
 	}
 #endif // !PPSSPP_PLATFORM(SWITCH) && !PPSSPP_PLATFORM(OPENBSD)
 	return result;
+#endif
 }
 
 /**
@@ -2202,7 +2217,9 @@ int initNetwork(SceNetAdhocctlAdhocId *adhoc_id){
 	if (isLoopbackIP(g_adhocServerIP.in.sin_addr.s_addr)) { 
 		int on = 1;
 		// Not sure what is this SO_DONTROUTE supposed to fix, but i do remembered there were issue related to multiple-instances without SO_DONTROUTE, but forgot how to reproduce it :(
+#if !PPSSPP_PLATFORM(3DS)
 		setsockopt((int)metasocket, SOL_SOCKET, SO_DONTROUTE, (const char*)&on, sizeof(on));
+#endif
 		setSockReuseAddrPort((int)metasocket);
 
 		g_localhostIP.in.sin_port = 0;

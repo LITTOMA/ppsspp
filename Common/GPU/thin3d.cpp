@@ -307,10 +307,10 @@ void DrawContext::DestroyPresets() {
 
 void ConvertFromRGBA8888(uint8_t *dst, const uint8_t *src, uint32_t dstStride, uint32_t srcStride, uint32_t width, uint32_t height, DataFormat format) {
 	// Must skip stride in the cases below.  Some games pack data into the cracks, like MotoGP.
-	const uint32_t *src32 = (const uint32_t *)src;
+	const u32 *src32 = (const u32 *)src;
 
 	if (format == Draw::DataFormat::R8G8B8A8_UNORM) {
-		uint32_t *dst32 = (uint32_t *)dst;
+		u32 *dst32 = (u32 *)dst;
 		if (src == dst) {
 			return;
 		} else {
@@ -362,10 +362,10 @@ void ConvertFromRGBA8888(uint8_t *dst, const uint8_t *src, uint32_t dstStride, u
 
 void ConvertFromBGRA8888(uint8_t *dst, const uint8_t *src, uint32_t dstStride, uint32_t srcStride, uint32_t width, uint32_t height, DataFormat format) {
 	// Must skip stride in the cases below.  Some games pack data into the cracks, like MotoGP.
-	const uint32_t *src32 = (const uint32_t *)src;
+	const u32 *src32 = (const u32 *)src;
 
 	if (format == Draw::DataFormat::B8G8R8A8_UNORM) {
-		uint32_t *dst32 = (uint32_t *)dst;
+		u32 *dst32 = (u32 *)dst;
 		if (src == dst) {
 			return;
 		} else {
@@ -376,7 +376,7 @@ void ConvertFromBGRA8888(uint8_t *dst, const uint8_t *src, uint32_t dstStride, u
 			}
 		}
 	} else if (format == Draw::DataFormat::R8G8B8A8_UNORM) {
-		uint32_t *dst32 = (uint32_t *)dst;
+		u32 *dst32 = (u32 *)dst;
 		for (uint32_t y = 0; y < height; ++y) {
 			ConvertBGRA8888ToRGBA8888(dst32, src32, width);
 			src32 += srcStride;

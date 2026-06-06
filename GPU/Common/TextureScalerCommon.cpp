@@ -650,7 +650,11 @@ const int MIN_LINES_PER_THREAD = 4;
 
 void TextureScalerCommon::ScaleXBRZ(int factor, u32* source, u32* dest, int width, int height) {
 	xbrz::ScalerCfg cfg;
-	ParallelRangeLoop(&g_threadManager, std::bind(&xbrz::scale, factor, source, dest, width, height, xbrz::ColorFormat::ARGB, cfg, std::placeholders::_1, std::placeholders::_2), 0, height, MIN_LINES_PER_THREAD);
+	const uint32_t *source32 = reinterpret_cast<const uint32_t *>(source);
+	uint32_t *dest32 = reinterpret_cast<uint32_t *>(dest);
+	ParallelRangeLoop(&g_threadManager, [=](int yFirst, int yLast) {
+		xbrz::scale(factor, source32, dest32, width, height, xbrz::ColorFormat::ARGB, cfg, yFirst, yLast);
+	}, 0, height, MIN_LINES_PER_THREAD);
 }
 
 void TextureScalerCommon::ScaleBilinear(int factor, u32* source, u32* dest, int width, int height) {

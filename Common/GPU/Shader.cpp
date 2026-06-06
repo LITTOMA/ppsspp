@@ -1,10 +1,15 @@
+#include "ppsspp_config.h"
 #include "Common/GPU/Shader.h"
+
+#include <cstring>
 
 #ifdef USE_CRT_DBG
 #undef new
 #endif
 
+#if !PPSSPP_PLATFORM(3DS)
 #include "ext/glslang/SPIRV/GlslangToSpv.h"
+#endif
 
 const char *ShaderLanguageAsString(ShaderLanguage lang) {
 	switch (lang) {
@@ -115,6 +120,7 @@ void ShaderLanguageDesc::Init(ShaderLanguage lang) {
 	}
 }
 
+#if !PPSSPP_PLATFORM(3DS)
 void InitShaderResources(TBuiltInResource &Resources) {
 	Resources.maxLights = 32;
 	Resources.maxClipPlanes = 6;
@@ -210,3 +216,4 @@ void InitShaderResources(TBuiltInResource &Resources) {
 	Resources.limits.generalVariableIndexing = 1;
 	Resources.limits.generalConstantMatrixVectorIndexing = 1;
 }
+#endif

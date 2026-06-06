@@ -29,7 +29,9 @@
 
 #include <mutex>
 
+#if !PPSSPP_PLATFORM(3DS)
 #include "ext/lua/lapi.h"
+#endif
 
 #include "Common/System/System.h"
 #include "Common/System/Request.h"

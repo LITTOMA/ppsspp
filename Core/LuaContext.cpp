@@ -1,9 +1,32 @@
 #include <string>
 
+#include "ppsspp_config.h"
 #include "Common/Log.h"
 #include "Common/StringUtils.h"
 #include "Core/LuaContext.h"
 #include "Core/MemMap.h"
+
+#if PPSSPP_PLATFORM(3DS)
+
+LuaContext g_lua;
+
+void LuaContext::Init() {
+	lines_.clear();
+}
+
+void LuaContext::Shutdown() {
+	lines_.clear();
+}
+
+void LuaContext::Print(LogLineType type, std::string_view text) {
+	lines_.push_back(LuaLogLine{ type, std::string(text), 0 });
+}
+
+void LuaContext::ExecuteConsoleCommand(std::string_view cmd) {
+	Print(LogLineType::Error, "Lua console is disabled on 3DS");
+}
+
+#else
 
 // Sol is expensive to include so we only do it here.
 #include "ext/sol/sol.hpp"
@@ -139,3 +162,5 @@ void LuaContext::ExecuteConsoleCommand(std::string_view cmd) {
 		lines_.push_back(LuaLogLine{ LogLineType::Error, std::string(e.what()) });
 	}
 }
+
+#endif

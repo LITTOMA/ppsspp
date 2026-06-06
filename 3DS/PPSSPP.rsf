@@ -1,0 +1,87 @@
+BasicInfo:
+  Title                   : $(APP_TITLE)
+  CompanyCode             : "00"
+  ProductCode             : $(APP_PRODUCT_CODE)
+  ContentType             : Application
+
+TitleInfo:
+  Category                : Application
+  UniqueId                : $(APP_UNIQUE_ID)
+
+Option:
+  UseOnSD                 : true
+  FreeProductCode         : true
+  MediaFootPadding        : false
+  EnableCrypt             : false
+  EnableCompress          : true
+
+AccessControlInfo:
+  CoreVersion             : 2
+  DescVersion             : 2
+  ReleaseKernelMajor      : "02"
+  ReleaseKernelMinor      : "33"
+  UseExtSaveData          : false
+  MemoryType              : Application
+  SystemMode              : 64MB
+  SystemModeExt           : Legacy
+  CpuSpeed                : 268MHz
+  EnableL2Cache           : false
+  IdealProcessor          : 0
+  AffinityMask            : 1
+  Priority                : 16
+  MaxCpu                  : 0x9E
+  HandleTableSize         : 0x200
+  DisableDebug            : false
+  EnableForceDebug        : false
+  CanWriteSharedPage      : true
+  CanUsePrivilegedPriority: false
+  CanUseNonAlphabetAndNumber: true
+  PermitMainFunctionArgument: true
+  CanShareDeviceMemory    : true
+  RunnableOnSleep         : false
+  SpecialMemoryArrange    : true
+  CanAccessCore2          : true
+
+  IORegisterMapping:
+   - 1ff00000-1ff7ffff
+
+  MemoryMapping:
+   - 1f000000-1f5fffff:r
+
+  FileSystemAccess:
+   - DirectSdmc
+   - DirectSdmcWrite
+
+  ServiceAccessControl:
+   - APT:U
+   - cfg:u
+   - fs:USER
+   - gsp::Gpu
+   - hid:USER
+   - ndm:u
+   - ptm:u
+   - soc:U
+   - ssl:C
+   - dsp::DSP
+   - csnd:SND
+   - ldr:ro
+
+SystemControlInfo:
+  SaveDataSize            : 0KB
+  RemasterVersion         : 0
+  StackSize               : 0x40000
+
+  Dependency:
+    am                    : 0x0004013000001502
+    cfg                   : 0x0004013000001702
+    csnd                  : 0x0004013000002702
+    dsp                   : 0x0004013000001a02
+    gsp                   : 0x0004013000001c02
+    hid                   : 0x0004013000001d02
+    ndm                   : 0x0004013000002b02
+    pdn                   : 0x0004013000002102
+    ps                    : 0x0004013000003102
+    ptm                   : 0x0004013000002202
+    ro                    : 0x0004013000003702
+    socket                : 0x0004013000002e02
+    ssl                   : 0x0004013000002f02

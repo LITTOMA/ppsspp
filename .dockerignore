@@ -1,0 +1,12 @@
+.git
+build*/
+artifacts/
+*.iso
+*.cso
+*.pbp
+*.elf
+*.3dsx
+*.cia
+*.zip
+*.7z
+*.rar

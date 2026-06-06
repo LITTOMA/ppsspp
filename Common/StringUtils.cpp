@@ -32,10 +32,12 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include <algorithm>
 #include <iomanip>
 #include <cctype>
+#include <cstdio>
 
 #include "Common/Buffer.h"
 #include "Common/StringUtils.h"
@@ -300,6 +302,19 @@ std::string StringFromFormat(const char* format, ...) {
 		temp.resize(0);
 	} else {
 		temp.resize(required);
+	}
+	va_end(args);
+#elif PPSSPP_PLATFORM(3DS)
+	va_start(args, format);
+	va_list argsCopy;
+	va_copy(argsCopy, args);
+	int required = vsnprintf(nullptr, 0, format, argsCopy);
+	va_end(argsCopy);
+	if (required >= 0) {
+		std::vector<char> buf(required + 1);
+		if (vsnprintf(buf.data(), buf.size(), format, args) >= 0) {
+			temp.assign(buf.data(), required);
+		}
 	}
 	va_end(args);
 #else

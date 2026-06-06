@@ -127,10 +127,12 @@ namespace basisu
 	template <typename T0, typename T1> inline T0 lerp(T0 a, T0 b, T1 c) { return a + (b - a) * c; }
 
 	template <typename S> inline S maximum(S a, S b) { return (a > b) ? a : b; }
+	template <typename S, typename T> inline typename std::common_type<S, T>::type maximum(S a, T b) { return (a > b) ? a : b; }
 	template <typename S> inline S maximum(S a, S b, S c) { return maximum(maximum(a, b), c); }
 	template <typename S> inline S maximum(S a, S b, S c, S d) { return maximum(maximum(maximum(a, b), c), d); }
 	
 	template <typename S> inline S minimum(S a, S b) {	return (a < b) ? a : b; }
+	template <typename S, typename T> inline typename std::common_type<S, T>::type minimum(S a, T b) { return (a < b) ? a : b; }
 	template <typename S> inline S minimum(S a, S b, S c) {	return minimum(minimum(a, b), c); }
 	template <typename S> inline S minimum(S a, S b, S c, S d) { return minimum(minimum(minimum(a, b), c), d); }
 
@@ -161,6 +163,7 @@ namespace basisu
 
 	template<typename T> inline T open_range_check(T v, T minv, T maxv) { assert(v >= minv && v < maxv); BASISU_NOTE_UNUSED(minv); BASISU_NOTE_UNUSED(maxv); return v; }
 	template<typename T> inline T open_range_check(T v, T maxv) { assert(v < maxv); BASISU_NOTE_UNUSED(maxv); return v; }
+	template<typename T, typename U> inline typename std::common_type<T, U>::type open_range_check(T v, U maxv) { assert(v < maxv); BASISU_NOTE_UNUSED(maxv); return v; }
 
 	inline uint32_t total_bits(uint32_t v) { uint32_t l = 0; for ( ; v > 0U; ++l) v >>= 1; return l; }
 

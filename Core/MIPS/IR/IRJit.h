@@ -174,7 +174,11 @@ public:
 		JitBlockMeta meta{};
 		if (IsValidBlock(blockNum)) {
 			meta.valid = true;
-			blocks_[blockNum].GetRange(&meta.addr, &meta.sizeInBytes);
+			u32 addr;
+			u32 sizeInBytes;
+			blocks_[blockNum].GetRange(&addr, &sizeInBytes);
+			meta.addr = addr;
+			meta.sizeInBytes = sizeInBytes;
 		}
 		return meta;
 	}

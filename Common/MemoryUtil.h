@@ -18,11 +18,11 @@
 #pragma once
 
 #ifndef _WIN32
-#ifndef __SWITCH__
-#include <sys/mman.h>
-#else
+#if defined(__SWITCH__)
 #include <switch.h>
-#endif // !__SWITCH__
+#elif !defined(__3DS__)
+#include <sys/mman.h>
+#endif
 #endif
 #include <stdint.h>
 

@@ -1,0 +1,23 @@
+services:
+  ppsspp-3ds-runner:
+    build:
+      context: ../..
+      dockerfile: ci/3ds/Dockerfile.runner
+      args:
+        RUNNER_VERSION: ${RUNNER_VERSION:-2.334.0}
+    image: ppsspp-3ds-action-runner:latest
+    environment:
+      REPO_URL: ${REPO_URL}
+      GITHUB_REPOSITORY: ${GITHUB_REPOSITORY:-}
+      RUNNER_TOKEN: ${RUNNER_TOKEN:-}
+      GH_PAT: ${GH_PAT:-}
+      RUNNER_NAME: ${RUNNER_NAME:-ppsspp-3ds-runner}
+      RUNNER_LABELS: ${RUNNER_LABELS:-3ds,devkitpro,devkitarm}
+      RUNNER_EPHEMERAL: ${RUNNER_EPHEMERAL:-false}
+      RUNNER_WORKDIR: /_work
+    volumes:
+      - ppsspp-3ds-runner-work:/_work
+    restart: unless-stopped
+
+volumes:
+  ppsspp-3ds-runner-work:
