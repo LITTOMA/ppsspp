@@ -90,6 +90,10 @@ uint32_t P3DS_KeysDown(void) {
 	return ConvertKeys(hidKeysDown());
 }
 
+uint32_t P3DS_KeysUp(void) {
+	return ConvertKeys(hidKeysUp());
+}
+
 uint32_t P3DS_KeysHeld(void) {
 	return ConvertKeys(hidKeysHeld());
 }

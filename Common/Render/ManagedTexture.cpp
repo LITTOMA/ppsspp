@@ -187,6 +187,9 @@ Draw::Texture *CreateTextureFromFile(Draw::DrawContext *draw, const char *filena
 		return nullptr;
 	}
 	Draw::Texture *texture = CreateTextureFromFileData(draw, buffer, fileSize, type, generateMips, filename);
+	if (!texture) {
+		ERROR_LOG(Log::IO, "Failed to create texture from '%s' (%d bytes)", filename, (int)fileSize);
+	}
 	delete[] buffer;
 	return texture;
 }

@@ -37,6 +37,7 @@ void P3DS_DebugString(const char *message);
 
 void P3DS_ScanInput(void);
 uint32_t P3DS_KeysDown(void);
+uint32_t P3DS_KeysUp(void);
 uint32_t P3DS_KeysHeld(void);
 void P3DS_ReadCircle(int *dx, int *dy);
 

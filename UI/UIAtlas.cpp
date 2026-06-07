@@ -546,7 +546,7 @@ AtlasData AtlasProvider(Draw::DrawContext *draw, AtlasChoice atlas, float dpiSca
 	case AtlasChoice::Font:
 	{
 		Draw::Texture *fontTexture = nullptr;
-#if PPSSPP_PLATFORM(WINDOWS) || PPSSPP_PLATFORM(ANDROID) || PPSSPP_PLATFORM(MAC) || PPSSPP_PLATFORM(IOS)
+#if PPSSPP_PLATFORM(WINDOWS) || PPSSPP_PLATFORM(ANDROID) || PPSSPP_PLATFORM(MAC) || PPSSPP_PLATFORM(IOS) || defined(__3DS__) || defined(_3DS)
 		// Load the smaller ascii font only, like on Android. For debug ui etc.
 		// NOTE: We better be sure here that the correct metadata is loaded..
 		LoadAtlasMetadata(font_atlas, "asciifont_atlas.meta");

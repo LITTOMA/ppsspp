@@ -245,6 +245,12 @@ void __PPGeSetupListArgs()
 void __PPGeInit() {
 	// PPGe isn't really important for headless, and LoadZIM takes a long time.
 	bool skipZIM = System_GetPropertyBool(SYSPROP_SKIP_UI);
+#if defined(__3DS__) || defined(_3DS)
+	// The 3DS UI path does not depend on PPGe, and the large zstd-compressed
+	// PPGe atlas can fail during CIA startup scans. Keep PSP dialogs headless
+	// for now instead of letting repeated atlas decode errors cover the UI.
+	skipZIM = true;
+#endif
 
 	u8 *imageData[12]{};
 	int width[12]{};

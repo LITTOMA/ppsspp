@@ -259,7 +259,7 @@ void GPIGPOScreen::CreatePopupContents(UI::ViewGroup *parent) {
 	parent->Add(new CheckBox(&g_Config.bShowGPOLEDs, dev->T("Show GPO LEDs")));
 	for (int i = 0; i < 8; i++) {
 		std::string name = ApplySafeSubstitutions(dev->T("GPI switch %1"), i);
-		parent->Add(new BitCheckBox(&g_GPIBits, 1 << i, name));
+		parent->Add(new BitCheckBox(reinterpret_cast<uint32_t *>(&g_GPIBits), (uint32_t)(1u << i), name));
 	}
 }
 

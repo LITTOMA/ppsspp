@@ -123,13 +123,17 @@
 #include "UI/Background.h"
 #include "UI/BackgroundAudio.h"
 #include "UI/ControlMappingScreen.h"
+#if !defined(__3DS__) && !defined(_3DS)
 #include "UI/DevScreens.h"
+#endif
 #include "UI/DiscordIntegration.h"
 #include "UI/EmuScreen.h"
 #include "UI/GameInfoCache.h"
 #include "UI/GameSettingsScreen.h"
+#if !defined(__3DS__) && !defined(_3DS)
 #include "UI/DeveloperToolsScreen.h"
 #include "UI/GPUDriverTestScreen.h"
+#endif
 #include "UI/MiscScreens.h"
 #include "UI/MemStickScreen.h"
 #include "UI/OnScreenDisplay.h"
@@ -538,6 +542,11 @@ void NativeInit(int argc, const char *argv[], const char *savegame_dir, const ch
 #elif PPSSPP_PLATFORM(SWITCH)
 	g_Config.memStickDirectory = g_Config.internalDataDirectory / "config/ppsspp";
 	g_Config.flash0Directory = g_Config.internalDataDirectory / "assets/flash0";
+#elif defined(__3DS__) || defined(_3DS)
+	g_Config.defaultCurrentDirectory = Path("sdmc:/");
+	g_Config.currentDirectory = Path("sdmc:/");
+	g_Config.memStickDirectory = Path("sdmc:/PSP");
+	g_Config.flash0Directory = Path("romfs:/flash0");
 #elif !PPSSPP_PLATFORM(WINDOWS)
 	std::string config;
 	if (getenv("XDG_CONFIG_HOME") != NULL)
@@ -582,8 +591,10 @@ void NativeInit(int argc, const char *argv[], const char *savegame_dir, const ch
 
 	bool gotBootFilename = false;
 	bool gotoGameSettings = false;
+#if !defined(__3DS__) && !defined(_3DS)
 	bool gotoTouchScreenTest = false;
 	bool gotoDeveloperTools = false;
+#endif
 	boot_filename.clear();
 
 	// Parse command line
@@ -654,12 +665,18 @@ void NativeInit(int argc, const char *argv[], const char *savegame_dir, const ch
 					g_Config.DoNotSaveSetting(&g_Config.bFullScreen);
 					g_Config.bFullScreen = false;
 				}
-				if (!strcmp(argv[i], "--touchscreentest"))
+				if (!strcmp(argv[i], "--touchscreentest")) {
+#if !defined(__3DS__) && !defined(_3DS)
 					gotoTouchScreenTest = true;
+#endif
+				}
 				if (!strcmp(argv[i], "--gamesettings"))
 					gotoGameSettings = true;
-				if (!strcmp(argv[i], "--developertools"))
+				if (!strcmp(argv[i], "--developertools")) {
+#if !defined(__3DS__) && !defined(_3DS)
 					gotoDeveloperTools = true;
+#endif
+				}
 				if (!strncmp(argv[i], "--appendconfig=", strlen("--appendconfig=")) && strlen(argv[i]) > strlen("--appendconfig=")) {
 					g_Config.SetAppendedConfigIni(Path(argv[i] + strlen("--appendconfig=")));
 					g_Config.LoadAppendedConfig();
@@ -783,17 +800,23 @@ void NativeInit(int argc, const char *argv[], const char *savegame_dir, const ch
 		g_screenManager->switchScreen(new LogoScreen(AfterLogoScreen::MEMSTICK_SCREEN_INITIAL_SETUP));
 	} else if (gotoGameSettings) {
 		g_screenManager->switchScreen(new LogoScreen(AfterLogoScreen::TO_GAME_SETTINGS));
+#if !defined(__3DS__) && !defined(_3DS)
 	} else if (gotoTouchScreenTest) {
 		g_screenManager->switchScreen(new MainScreen());
 		g_screenManager->push(new TouchTestScreen(Path()));
 	} else if (gotoDeveloperTools) {
 		g_screenManager->switchScreen(new MainScreen());
 		g_screenManager->push(new DeveloperToolsScreen(Path()));
+#endif
 	} else if (skipLogo && !boot_filename.empty()) {
 		INFO_LOG(Log::System, "Launching EmuScreen with boot filename '%s'", boot_filename.c_str());
 		g_screenManager->switchScreen(new EmuScreen(boot_filename));
 	} else {
+#if defined(__3DS__) || defined(_3DS)
+		g_screenManager->switchScreen(new MainScreen());
+#else
 		g_screenManager->switchScreen(new LogoScreen(AfterLogoScreen::DEFAULT));
+#endif
 	}
 
 	g_screenManager->SetBackgroundOverlayScreens(new BackgroundScreen(), new OSDOverlayScreen());

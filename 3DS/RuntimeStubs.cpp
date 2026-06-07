@@ -1,10 +1,16 @@
 #include <string>
+#include <sys/types.h>
 
 #include "Common/GPU/OpenGL/GLFeatures.h"
 #include "Common/GPU/ShaderTranslation.h"
 #include "Common/VR/PPSSPPVR.h"
 
+class GPUCommon;
+class UIContext;
+
 GLExtensions gl_extensions{};
+std::string g_all_gl_extensions;
+std::string g_all_egl_extensions;
 
 bool GLExtensions::VersionGEThan(int major, int minor, int sub) {
 	if (ver[0] > major)
@@ -171,4 +177,35 @@ void UpdateVRView(float *leftEye, float *rightEye) {
 }
 
 void UpdateVRViewMatrices() {
+}
+
+const char *GetCompilerABI() {
+	return "3ds-arm";
+}
+
+bool VulkanMayBeAvailable() {
+	return false;
+}
+
+void DrawGPUMemoryVis(UIContext *ui, GPUCommon *gpu) {
+	(void)ui;
+	(void)gpu;
+}
+
+void DrawGPUProfilerVis(UIContext *ui, GPUCommon *gpu) {
+	(void)ui;
+	(void)gpu;
+}
+
+extern "C" pid_t waitpid(pid_t pid, int *status, int options) {
+	(void)pid;
+	(void)status;
+	(void)options;
+	return (pid_t)-1;
+}
+
+extern "C" int execvp(const char *file, char *const argv[]) {
+	(void)file;
+	(void)argv;
+	return -1;
 }

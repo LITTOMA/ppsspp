@@ -21,6 +21,12 @@ RUN git clone --depth 1 --branch makerom-v0.19.0 https://github.com/3DSGuy/Proje
     && install -m 0755 /tmp/Project_CTR/makerom/bin/makerom "${DEVKITPRO}/tools/bin/makerom" \
     && rm -rf /tmp/Project_CTR
 
+RUN git config --global url.https://github.com/.insteadOf git://github.com/ \
+    && git clone --depth 1 --recursive https://github.com/Epicpkmn11/bannertool.git /tmp/bannertool \
+    && make -C /tmp/bannertool -j"$(nproc)" \
+    && install -m 0755 /tmp/bannertool/output/linux-x86_64/bannertool "${DEVKITPRO}/tools/bin/bannertool" \
+    && rm -rf /tmp/bannertool
+
 RUN useradd -m -s /bin/bash runner \
     && mkdir -p /actions-runner /_work \
     && chown -R runner:runner /actions-runner /_work

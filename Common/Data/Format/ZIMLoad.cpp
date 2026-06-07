@@ -10,6 +10,13 @@
 #include "Common/Math/math_util.h"
 #include "Common/File/VFS/VFS.h"
 
+static long long ZSTDErrorCode(size_t value) {
+	if (sizeof(size_t) == 4 && (value & 0x80000000u) != 0) {
+		return (long long)(int32_t)(uint32_t)value;
+	}
+	return (long long)value;
+}
+
 int ezuncompress(unsigned char* pDest, long* pnDestLen, const unsigned char* pSrc, long nSrcLen) {
 	z_stream stream;
 	stream.next_in = (Bytef*)pSrc;
@@ -90,6 +97,10 @@ int LoadZIMPtr(const uint8_t *zim, size_t datasize, int *width, int *height, int
 	}
 
 	image[0] = (uint8_t *)malloc(total_data_size);
+	if (!image[0]) {
+		ERROR_LOG(Log::IO, "Failed to allocate %d bytes for ZIM image", total_data_size);
+		return 0;
+	}
 	for (int i = 1; i < num_levels; i++) {
 		image[i] = image[i-1] + image_data_size[i-1];
 	}
@@ -109,8 +120,12 @@ int LoadZIMPtr(const uint8_t *zim, size_t datasize, int *width, int *height, int
 		}
 	} else if (*flags & ZIM_ZSTD_COMPRESSED) {
 		size_t outlen = ZSTD_decompress(*image, total_data_size, zim + 16, datasize - 16);
-		if (outlen != (size_t)total_data_size) {
-			ERROR_LOG(Log::IO, "ZIM zstd format decompression failed: %lld", (long long)outlen);
+		if (ZSTD_isError(outlen) || outlen != (size_t)total_data_size) {
+			ERROR_LOG(Log::IO, "ZIM zstd format decompression failed: %lld (%s), expected %d bytes from %lld input bytes",
+				ZSTDErrorCode(outlen),
+				ZSTD_isError(outlen) ? ZSTD_getErrorName(outlen) : "wrong output size",
+				total_data_size,
+				(long long)datasize - 16);
 			free(*image);
 			*image = 0;
 			return 0;

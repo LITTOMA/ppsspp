@@ -1,6 +1,10 @@
 .git
 build*/
 artifacts/
+.ci-tools/
+_ppsspp-artifacts-*/
+_ppsspp-build-*/
+_bnr_probe/
 *.iso
 *.cso
 *.pbp

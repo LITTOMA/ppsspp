@@ -290,10 +290,17 @@ void DrawBuffer::DrawImageRotated(ImageID atlas_image, float x, float y, float s
 		{u2, image->v2},
 		{u1, image->v2},
 	};
-	for (int i = 0; i < 6; i++) {
-		if (angle != 0.0f) {
-			rot(v[i], angle, x, y);
+	if (angle != 0.0f) {
+		const float sa = sinf(angle);
+		const float ca = cosf(angle);
+		for (int i = 0; i < 6; i++) {
+			const float dx = v[i][0] - x;
+			const float dy = v[i][1] - y;
+			v[i][0] = dx * ca + dy * -sa + x;
+			v[i][1] = dx * sa + dy * ca + y;
 		}
+	}
+	for (int i = 0; i < 6; i++) {
 		V(v[i][0], v[i][1], 0, color, uv[i][0], uv[i][1]);
 	}
 }

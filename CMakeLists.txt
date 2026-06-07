@@ -149,7 +149,11 @@ endif()
 include(CheckCXXSourceCompiles)
 include(GNUInstallDirs)
 
-add_compile_definitions(ASSETS_DIR="${CMAKE_INSTALL_FULL_DATADIR}/ppsspp/assets/")
+if(N3DS)
+	add_compile_definitions(ASSETS_DIR="romfs:/")
+else()
+	add_compile_definitions(ASSETS_DIR="${CMAKE_INSTALL_FULL_DATADIR}/ppsspp/assets/")
+endif()
 
 if(OPENXR AND NOT ARMV7_DEVICE)
 	add_compile_definitions(OPENXR)
@@ -1749,6 +1753,11 @@ list(APPEND NativeAppSource
 	UI/RetroAchievementScreens.cpp
 	UI/RetroAchievementScreens.h
 )
+
+if(N3DS)
+	list(FILTER NativeAppSource EXCLUDE REGEX "^UI/ImDebugger/")
+	list(APPEND nativeExtra ${NativeAppSource})
+endif()
 
 if(ANDROID)
 	if(ARM)

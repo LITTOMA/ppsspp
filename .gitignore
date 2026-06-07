@@ -138,9 +138,14 @@ CMakeFiles
 CMakeUserPresets.json
 compile_commands.json
 artifacts/
+.ci-tools/
 _ppsspp-artifacts-full/
+_ppsspp-artifacts-official-ui/
 _ppsspp-build-full/
+_ppsspp-build-official-ui/
+_ppsspp-build-ui-probe/
 _ppsspp-source/
+_bnr_probe/
 _layout-backup-*/
 
 # Clangd 
