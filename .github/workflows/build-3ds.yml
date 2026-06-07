@@ -26,13 +26,14 @@ jobs:
     container:
       image: devkitpro/devkitarm:latest
     env:
-      CI_DKP_INSTALL: "1"
+      CI_DKP_INSTALL: "0"
       REQUIRE_3DS_ARTIFACTS: "1"
     steps:
       - name: Prepare devkitPro container
         run: |
           if command -v dkp-pacman >/dev/null 2>&1; then
-            dkp-pacman -Sy --noconfirm --needed 3ds-dev
+            dkp-pacman -Sy --noconfirm --needed 3ds-dev || \
+              echo "::warning::dkp-pacman refresh failed; continuing with tools already present in devkitpro/devkitarm"
           fi
 
       - name: Check out source
