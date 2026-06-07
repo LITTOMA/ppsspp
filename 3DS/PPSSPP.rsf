@@ -1,12 +1,13 @@
 BasicInfo:
-  Title                   : PPSSPP
+  Title                   : "PPSSPP"
   CompanyCode             : "00"
-  ProductCode             : CTR-P-PPSP
+  ProductCode             : "CTR-P-PPSP"
+  Logo                    : Nintendo
   ContentType             : Application
 
 TitleInfo:
   Category                : Application
-  UniqueId                : 0xF5D0D
+  UniqueId                : 0xEC0DE
 
 Option:
   UseOnSD                 : true
@@ -159,7 +160,6 @@ AccessControlInfo:
 
   FileSystemAccess:
    - DirectSdmc
-   - DirectSdmcWrite
 
   ServiceAccessControl:
    - APT:U
