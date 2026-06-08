@@ -7,16 +7,18 @@ It exercises:
 - PSP boot and HLE startup
 - controller reads, including face buttons, d-pad, triggers, Start and Select
 - analog input
-- a simple libGU sprite path
-- 44.1 kHz stereo audio callback through `pspaudiolib`
 - vblank/frame pacing
+- debug framebuffer text output
+- a small ASCII heartbeat animation
+
+This is intentionally conservative. It does not use libGU or PSP audio callbacks,
+so a hang here points at core PSP execution/input/display timing instead of a
+graphics or audio stress path.
 
 Controls:
 
-- D-pad / analog: move the rectangle
-- Triangle: toggle the tone
-- Start: toggle automatic rectangle drift
-- Select: recenter the rectangle
+- Triangle: increment a visible toggle counter
+- Start + Select: exit
 
 Build from the repository root:
 
