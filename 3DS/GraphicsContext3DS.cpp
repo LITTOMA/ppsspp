@@ -308,21 +308,11 @@ private:
 class Pipeline3DS : public Draw::Pipeline {
 public:
 	explicit Pipeline3DS(const Draw::PipelineDesc &desc, const char *tag) : tag_(tag ? tag : "3ds_pipe") {
-		for (Draw::ShaderModule *shader : desc.shaders) {
-			auto *module = static_cast<ShaderModule3DS *>(shader);
-			if (module && module->GetStage() == ShaderStage::Fragment && module->UsesTexture()) {
-				textured_ = true;
-			}
-		}
-	}
-
-	bool Textured() const {
-		return textured_;
+		(void)desc;
 	}
 
 private:
 	std::string tag_;
-	bool textured_ = false;
 };
 
 static uint8_t Chan(uint32_t c, int shift) {
