@@ -145,9 +145,16 @@ _ppsspp-build-full/
 _ppsspp-build-official-ui/
 _ppsspp-build-ui-probe/
 _ppsspp-source/
+_psp-baseline-artifacts/
 _bnr_probe/
 _layout-backup-*/
 _tmp/
+
+Tools/psp-baseline/*.elf
+Tools/psp-baseline/*.o
+Tools/psp-baseline/*.PBP
+Tools/psp-baseline/*.SFO
+Tools/psp-baseline/PARAM.SFO
 
 # Clangd 
 .cache/
