@@ -80,6 +80,8 @@ std::string GPUBackendToString(GPUBackend backend) {
 		return "DIRECT3D11";
 	case GPUBackend::VULKAN:
 		return "VULKAN";
+	case GPUBackend::NINTENDO_3DS:
+		return "3DS";
 	}
 	// Intentionally not a default so we get a warning.
 	return "INVALID";
@@ -92,6 +94,8 @@ GPUBackend GPUBackendFromString(std::string_view backend) {
 		return GPUBackend::DIRECT3D11;
 	if (equalsNoCase(backend, "VULKAN") || backend == "3")
 		return GPUBackend::VULKAN;
+	if (equalsNoCase(backend, "3DS") || equalsNoCase(backend, "NINTENDO_3DS") || backend == "4")
+		return GPUBackend::NINTENDO_3DS;
 	return GPUBackend::OPENGL;
 }
 
@@ -469,6 +473,10 @@ const char * const vulkanDefaultBlacklist[] = {
 };
 
 static int DefaultGPUBackend() {
+#if PPSSPP_PLATFORM(3DS)
+	return (int)GPUBackend::NINTENDO_3DS;
+#endif
+
 	if (IsVREnabled()) {
 		return (int)GPUBackend::OPENGL;
 	}
@@ -525,6 +533,10 @@ static int DefaultGPUBackend() {
 }
 
 int Config::NextValidBackend() {
+#if PPSSPP_PLATFORM(3DS)
+	return (int)GPUBackend::NINTENDO_3DS;
+#endif
+
 	std::vector<std::string> split;
 	std::set<GPUBackend> failed;
 
@@ -591,6 +603,9 @@ bool Config::IsBackendEnabled(GPUBackend backend) {
 
 #if PPSSPP_PLATFORM(UWP)
 	if (backend != GPUBackend::DIRECT3D11)
+		return false;
+#elif PPSSPP_PLATFORM(3DS)
+	if (backend != GPUBackend::NINTENDO_3DS)
 		return false;
 #elif PPSSPP_PLATFORM(SWITCH)
 	if (backend != GPUBackend::OPENGL)
@@ -1588,9 +1603,13 @@ void Config::PostLoadCleanup() {
 
 	if (iGPUBackend == 1) {  // d3d9, no longer supported. Fall back to D3D11.
 		iGPUBackend = (int)GPUBackend::DIRECT3D11;
-	} else if (iGPUBackend < 0 || iGPUBackend > 3) {
+	} else if (iGPUBackend < 0 || iGPUBackend > (int)GPUBackend::NINTENDO_3DS) {
 		iGPUBackend = (int)DefaultGPUBackend();
 	}
+
+#if PPSSPP_PLATFORM(3DS)
+	iGPUBackend = (int)GPUBackend::NINTENDO_3DS;
+#endif
 
 #if PPSSPP_PLATFORM(UWP)
 	// Enforce D3D11.

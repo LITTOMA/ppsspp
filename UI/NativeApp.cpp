@@ -320,6 +320,10 @@ void PostLoadConfig() {
 }
 
 static void CheckFailedGPUBackends() {
+#if PPSSPP_PLATFORM(3DS)
+	return;
+#endif
+
 #ifdef _DEBUG
 	// If you're in debug mode, you probably don't want a fallback. If you're in release mode, use IGNORE below.
 	NOTICE_LOG(Log::Loader, "Not checking for failed graphics backends in debug mode");

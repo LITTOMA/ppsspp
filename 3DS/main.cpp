@@ -21,6 +21,7 @@
 #include "Common/TimeUtil.h"
 #include "Core/Config.h"
 #include "Core/ConfigValues.h"
+#include "Core/System.h"
 #include "3DS/GraphicsContext3DS.h"
 #include "Platform3DS.h"
 
@@ -176,13 +177,15 @@ static void Pump3DSInput() {
 	P3DS_ScanInput();
 	const uint32_t down = P3DS_KeysDown();
 	const uint32_t up = P3DS_KeysUp();
+	const uint32_t held = P3DS_KeysHeld();
+	const bool inGame = GetUIState() == UISTATE_INGAME;
 
 	SendKey(P3DS_KEY_DUP, NKCODE_DPAD_UP, down, up);
 	SendKey(P3DS_KEY_DDOWN, NKCODE_DPAD_DOWN, down, up);
 	SendKey(P3DS_KEY_DLEFT, NKCODE_DPAD_LEFT, down, up);
 	SendKey(P3DS_KEY_DRIGHT, NKCODE_DPAD_RIGHT, down, up);
-	SendKey(P3DS_KEY_A, NKCODE_BUTTON_A, down, up);
-	SendKey(P3DS_KEY_B, NKCODE_BACK, down, up);
+	SendKey(P3DS_KEY_A, inGame ? NKCODE_BUTTON_A : NKCODE_DPAD_CENTER, down, up);
+	SendKey(P3DS_KEY_B, inGame ? NKCODE_BUTTON_B : NKCODE_BACK, down, up);
 	SendKey(P3DS_KEY_X, NKCODE_BUTTON_X, down, up);
 	SendKey(P3DS_KEY_Y, NKCODE_BUTTON_Y, down, up);
 	SendKey(P3DS_KEY_L, NKCODE_BUTTON_L1, down, up);
@@ -190,7 +193,7 @@ static void Pump3DSInput() {
 	SendKey(P3DS_KEY_SELECT, NKCODE_BUTTON_SELECT, down, up);
 	SendKey(P3DS_KEY_START, NKCODE_BUTTON_START, down, up);
 
-	if (down & P3DS_KEY_START) {
+	if ((held & (P3DS_KEY_START | P3DS_KEY_SELECT)) == (P3DS_KEY_START | P3DS_KEY_SELECT) && (down & (P3DS_KEY_START | P3DS_KEY_SELECT))) {
 		g_exitRequested = true;
 	}
 
@@ -227,6 +230,10 @@ int main(int argc, char **argv) {
 
 	const char *nativeArgv[] = { "PPSSPP.3dsx" };
 	NativeInit(1, nativeArgv, "sdmc:/3ds/PPSSPP", "romfs:/", "sdmc:/3ds/PPSSPP/cache");
+	g_Config.iGPUBackend = (int)GPUBackend::NINTENDO_3DS;
+	g_Config.sFailedGPUBackends.clear();
+	SetGPUBackend(GPUBackend::NINTENDO_3DS, "citro3d");
+	RuntimeLog("init: backend %s device=%s", GPUBackendToString(GetGPUBackend()).c_str(), GetGPUBackendDevice().c_str());
 	ProbeVFSFile("asciifont_atlas.zim");
 	ProbeVFSFile("asciifont_atlas.meta");
 	ProbeVFSFile("ui_images/images.svg");
