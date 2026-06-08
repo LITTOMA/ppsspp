@@ -5,6 +5,9 @@ BasicInfo:
   Logo                    : Nintendo
   ContentType             : Application
 
+RomFs:
+  RootPath                : $(APP_ROMFS)
+
 TitleInfo:
   Category                : Application
   UniqueId                : 0xEC0DE

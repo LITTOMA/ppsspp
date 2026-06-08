@@ -147,6 +147,7 @@ _ppsspp-build-ui-probe/
 _ppsspp-source/
 _bnr_probe/
 _layout-backup-*/
+_tmp/
 
 # Clangd 
 .cache/
